@@ -37,6 +37,7 @@ public class ReadFile {
                             doc.setTitle(removeTags(line));
                         }
                     }
+                    doc.setFile_path(path);
                     this.documentSet.add(doc);
                 }
             }
