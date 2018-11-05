@@ -23,6 +23,7 @@ public class ReadFile {
             while ((line = br.readLine()) != null){
                 lineNumber++;
                 if (line.contains("<DOC>")){
+                    String text = "";
                     Document doc = new Document();
                     doc.setStart_line(lineNumber);
                     while (!((line = br.readLine()).equals("</DOC>"))){
@@ -35,6 +36,12 @@ public class ReadFile {
                         }
                         if (line.contains("<TI>")){
                             doc.setTitle(removeTags(line));
+                        }
+                        if (line.contains("<TEXT>")){
+                            while (!((line = br.readLine()).equals("</TEXT>"))){
+                                text = text + line;
+                            }
+                            doc.setText(text);
                         }
                     }
                     doc.setFile_path(path);

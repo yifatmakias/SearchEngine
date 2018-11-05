@@ -12,6 +12,7 @@ public class Document {
     private String  docNumber;
     private Date date;
     private String title;
+    private String text;
 
     public Document() {
     }
@@ -50,6 +51,15 @@ public class Document {
         this.title = title;
     }
 
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public String getText() {
+        return text;
+    }
+
     @Override
     public String toString() {
         return "Document{" +
@@ -58,6 +68,7 @@ public class Document {
                 ", docNumber='" + docNumber + '\'' +
                 ", date=" + date +
                 ", title='" + title + '\'' +
+                ", text='" + text + '\'' +
                 '}';
     }
 }
