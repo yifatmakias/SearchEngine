@@ -5,32 +5,35 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-public class Document {
-
+public class Doc {
     private String file_path;
-    private int start_line;
     private String  docNumber;
     private Date date;
     private String title;
     private String text;
+    private int max_tf;
+    private int uniqueWordCount;
+    private String city;
 
-    public Document() {
+
+    public String getCity() {
+        return city;
     }
 
-    public Document(String file_path, int start_line, String docNumber, Date date, String title) {
-        this.file_path = file_path;
-        this.start_line = start_line;
-        this.docNumber = docNumber;
-        this.date = date;
-        this.title = title;
+    public void setMax_tf(int max_tf) {
+        this.max_tf = max_tf;
+    }
+
+    public void setUniqueWordCount(int uniqueWordCount) {
+        this.uniqueWordCount = uniqueWordCount;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
     }
 
     public void setFile_path(String file_path) {
         this.file_path = file_path;
-    }
-
-    public void setStart_line(int start_line) {
-        this.start_line = start_line;
     }
 
     public void setDocNumber(String docNumber) {
@@ -47,6 +50,10 @@ public class Document {
         }
     }
 
+    public String getText() {
+        return text;
+    }
+
     public void setTitle(String title) {
         this.title = title;
     }
@@ -56,15 +63,11 @@ public class Document {
         this.text = text;
     }
 
-    public String getText() {
-        return text;
-    }
 
     @Override
     public String toString() {
-        return "Document{" +
+        return "Doc{" +
                 "file_path='" + file_path + '\'' +
-                ", start_line=" + start_line +
                 ", docNumber='" + docNumber + '\'' +
                 ", date=" + date +
                 ", title='" + title + '\'' +

@@ -1,12 +1,18 @@
 package model;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import java.lang.String;
 import java.io.*;
+import java.nio.file.Files;
 import java.util.HashSet;
 import java.util.Set;
 
 public class ReadFile {
 
-    private Set<Document> documentSet;
+    private Set<Doc> documentSet;
     private String path;
 
     public ReadFile(String path) {
@@ -16,37 +22,19 @@ public class ReadFile {
 
     public void fillDocumentSet(){
         try {
-            BufferedReader br = new BufferedReader(new FileReader(path));
-            String line;
-            int lineNumber =0;
-
-            while ((line = br.readLine()) != null){
-                lineNumber++;
-                if (line.contains("<DOC>")){
-                    String text = "";
-                    Document doc = new Document();
-                    doc.setStart_line(lineNumber);
-                    while (!((line = br.readLine()).equals("</DOC>"))){
-                        lineNumber++;
-                        if (line.contains("<DOCNO>")){
-                            doc.setDocNumber(removeTags(line));
-                        }
-                        if (line.contains("<DATE1>")){
-                            doc.setDate(removeTags(line));
-                        }
-                        if (line.contains("<TI>")){
-                            doc.setTitle(removeTags(line));
-                        }
-                        if (line.contains("<TEXT>")){
-                            while (!((line = br.readLine()).equals("</TEXT>"))){
-                                text = text + line;
-                            }
-                            doc.setText(text);
-                        }
-                    }
-                    doc.setFile_path(path);
-                    this.documentSet.add(doc);
-                }
+            File f = new File(this.path);
+            Document document = Jsoup.parse(new String(Files.readAllBytes(f.toPath())));
+            Elements elements = document.getElementsByTag("DOC");
+            for (Element element: elements) {
+                Doc doc = new Doc();
+                doc.setFile_path(this.path);
+                doc.setDate(element.getElementsByTag("DATE1").text());
+                doc.setTitle(element.getElementsByTag("TI").text());
+                doc.setDocNumber(element.getElementsByTag("DOCNO").text());
+                doc.setText(element.getElementsByTag("TEXT").text());
+                String city = element.getElementsByAttributeValue("P","104").text().split(" ")[0].toUpperCase();
+                doc.setCity(city);
+                documentSet.add(doc);
             }
         }
         catch (IOException e){
@@ -54,13 +42,7 @@ public class ReadFile {
         }
     }
 
-    private String removeTags(String line){
-        line = line.replaceAll("<[^>]*>", "");
-        line = line.trim();
-        return line;
-    }
-
-    public Set<Document> getDocumentSet() {
+    public Set<Doc> getDocumentSet() {
         return documentSet;
     }
 }
