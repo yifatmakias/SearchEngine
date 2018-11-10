@@ -54,6 +54,10 @@ public class Doc {
         return text;
     }
 
+    public String getDocNumber() {
+        return docNumber;
+    }
+
     public void setTitle(String title) {
         this.title = title;
     }

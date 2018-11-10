@@ -28,6 +28,13 @@ public class Term {
 
     @Override
     public int hashCode() {
-        return Objects.hash(term);
+        return Objects.hash(this.term);
+    }
+
+    @Override
+    public String toString() {
+        return "Term{" +
+                "term='" + term + '\'' +
+                '}';
     }
 }
