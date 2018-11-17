@@ -8,50 +8,66 @@ public class Parse {
     private Set<String> stopWords;
     private Map<String, String> months;
 
-    public Parse(String text, Set<String> stopWords) {
-        this.tokens = new ArrayList<>(Arrays.asList(text.split("\\s+")));
+    public Parse(Set<String> stopWords) {
         this.terms = new HashSet<>();
         this.stopWords = stopWords;
         fillMonthDic();
     }
 
-    public void parse(){
+    public void parse(String text){
+        this.tokens = new ArrayList<>(Arrays.asList(text.split("\\s+")));
+
         for (int i = 0; i <tokens.size() ; i++) {
-            Boolean isTermed = false;
             String token = tokens.get(i);
 
+            if (token.length() <= 1){
+                continue;
+            }
+
+            if (token.charAt(token.length()-1) == ',' || token.charAt(token.length()-1) == '.' || token.charAt(token.length()-1) == ';' ||token.charAt(token.length()-1) == '?' || token.charAt(token.length()-1) == '!' || token.charAt(token.length()-1) == '-' || token.charAt(token.length()-1) == ':' || token.charAt(token.length()-1) == '"' || token.charAt(token.length()-1) == '}' || token.charAt(token.length()-1) == ')'){
+                token = token.substring(0,token.length()-1);
+            }
+
+            if (token.charAt(0) == ',' || token.charAt(0) == '.' || token.charAt(0) == ';' || token.charAt(0) == '?' || token.charAt(0) == '!' || token.charAt(0) == '-' || token.charAt(0) == ':' || token.charAt(0) == '"' || token.charAt(0) == '{' || token.charAt(0) == '('){
+                token = token.substring(1);
+            }
+
+            if (token.length() <= 1){
+                continue;
+            }
+            /**
             // upper and lower case letters.
             if (Character.isUpperCase(token.charAt(0))){
                 if (!tokens.contains(token.toLowerCase())){
                     terms.add(new Term(token.toUpperCase()));
-                    isTermed = true;
+                    continue;
                 }
                 else {
                     terms.add(new Term(token.toLowerCase()));
-                    isTermed = true;
+                    continue;
                 }
             }
+             **/
             // removing stop words.
             if (stopWords.contains(token)){
                 terms.remove(new Term(token));
                 tokens.remove(i);
+                continue;
             }
 
             // dealing with percentage.
             if (token.equals("percent") || token.equals("percentage")){
                 if (i-1 >=0 && isNumeric(tokens.get(i-1))){
                     terms.add(new Term(tokens.get(i-1)+"%"));
-                    isTermed = true;
                 }
             }
 
             // prices
-            if (token.equals("Dollars")){
+            else if (token.equals("Dollars")){
                 if (i-1 >= 0 && isNumeric(tokens.get(i-1))){
                     Double price = Double.parseDouble(tokens.get(i-1).replace(",",""));
                     if (price < 1000000){
                         terms.add(new Term(tokens.get(i-1)+" Dollars"));
-                        isTermed = true;
                     }
                     else {
                         price = price / 1000000;
@@ -60,7 +76,6 @@ public class Parse {
                             priceStr = priceStr.replace(".0", "");
                         }
                         terms.add(new Term(priceStr+" M"+" Dollars"));
-                        isTermed = true;
                     }
                 }
                 else {
@@ -69,39 +84,33 @@ public class Parse {
                             Double price = Double.parseDouble(tokens.get(i-2).replace(",",""));
                             if (price < 1000000){
                                 terms.add(new Term(tokens.get(i-2)+" "+tokens.get(i-1)+" Dollars"));
-                                isTermed = true;
                             }
                         }
                     }
                     if (i-1 >=0 && tokens.get(i-1).equals("m")){
                         if (i-2 >= 0 && isNumeric(tokens.get(i-2))){
                             terms.add(new Term(tokens.get(i-2)+" M"+" Dollars"));
-                            isTermed = true;
                         }
                     }
                     if (i-1 >=0 && tokens.get(i-1).equals("bn")){
                         if (i-2 >= 0 && isNumeric(tokens.get(i-2))){
                             terms.add(new Term(tokens.get(i-2)+"000 M"+" Dollars"));
-                            isTermed = true;
                         }
                     }
                 }
             }
-            if (token.contains("$")){
+            else if (token.contains("$")){
                 String newToken = token.replace("$","");
                 if (i+1 < tokens.size() && tokens.get(i+1).equals("million")){
                     terms.add(new Term(newToken+" M"+" Dollars"));
-                    isTermed = true;
                 }
                 if (i+1 < tokens.size() && tokens.get(i+1).equals("billion")){
                     terms.add(new Term(newToken+"000 M"+" Dollars"));
-                    isTermed = true;
                 }
                 else if (isNumeric(newToken)){
                     Double price = Double.parseDouble(newToken.replace(",",""));
                     if (price < 1000000){
                         terms.add(new Term(newToken+" Dollars"));
-                        isTermed = true;
                     }
                     else {
                         price = price / 1000000;
@@ -110,40 +119,35 @@ public class Parse {
                             priceStr = priceStr.replace(".0", "");
                         }
                         terms.add(new Term(priceStr+" M"+" Dollars"));
-                        isTermed = true;
                     }
                 }
             }
 
-            if (token.equals("dollars")){
+            else if (token.equals("dollars")){
                 if (i-1 >=0 && tokens.get(i-1).equals("U.S.")){
                     if (i-2 >=0 && tokens.get(i-2).equals("million")){
                         if (i-3 >=0 && isNumeric(tokens.get(i-3))){
                             terms.add(new Term(tokens.get(i-3)+" M"+" Dollars"));
-                            isTermed = true;
                         }
                     }
                     else if (i-2 >=0 && tokens.get(i-2).equals("billion")){
                         if (i-3 >=0 && isNumeric(tokens.get(i-3))){
                             terms.add(new Term(tokens.get(i-3)+"000 M"+" Dollars"));
-                            isTermed = true;
                         }
                     }
                     else if (i-2 >=0 && tokens.get(i-2).equals("trillion")){
                         if (i-3 >=0 && isNumeric(tokens.get(i-3))){
                             terms.add(new Term(tokens.get(i-3)+"000000 M"+" Dollars"));
-                            isTermed = true;
                         }
                     }
                 }
             }
             // dates
-            if (months.containsKey(token)){
+            else if (months.containsKey(token)){
                 if (i-1 >= 0 && tokens.get(i-1).matches("[0-9]+")){
                     int date = Integer.valueOf(tokens.get(i-1));
                     if (date <= 31){
                         terms.add(new Term(months.get(token)+"-"+date));
-                        isTermed = true;
                     }
                 }
                 if (i+1 < tokens.size() && tokens.get(i+1).matches("[0-9]+")){
@@ -151,55 +155,47 @@ public class Parse {
                     if (date <= 31){
                         if (date < 10){
                             terms.add(new Term(months.get(token)+"-0"+date));
-                            isTermed = true;
                         }
                         else {
                             terms.add(new Term(months.get(token)+"-"+date));
-                            isTermed = true;
                         }
                     }
                     else {
                         terms.add(new Term(date+"-"+months.get(token)));
-                        isTermed = true;
                     }
                 }
             }
-            if (token.equals("between") || token.equals("Between")){
+            else if (token.equals("between") || token.equals("Between")){
                 if (i+1 < tokens.size() && isNumeric(tokens.get(i+1))){
                     if (i+2 < tokens.size() && tokens.get(i+2).equals("and")){
                         if (i+3 < tokens.size() && isNumeric(tokens.get(i+3))){
                             terms.add(new Term(token+" "+tokens.get(i+1)+" "+tokens.get(i+2)+" "+tokens.get(i+3)));
-                            isTermed = true;
                         }
                     }
                 }
             }
             // Numbers
-            if (token.equals("Thousand")){
+            else if (token.equals("Thousand")){
                 if (i-1 >= 0 && isNumeric(tokens.get(i-1))){
                     terms.add(new Term(tokens.get(i-1)+"K"));
-                    isTermed = true;
                 }
             }
-            if (token.equals("Million")){
+            else if (token.equals("Million")){
                 if (i-1 >= 0 && isNumeric(tokens.get(i-1))){
                     terms.add(new Term(tokens.get(i-1)+"M"));
-                    isTermed = true;
                 }
             }
-            if (token.equals("Billion")){
+            else if (token.equals("Billion")){
                 if (i-1 >= 0 && isNumeric(tokens.get(i-1))){
                     terms.add(new Term(tokens.get(i-1)+"B"));
-                    isTermed = true;
                 }
             }
-            if (token.equals("Trillion")){
+            else if (token.equals("Trillion")){
                 if (i-1 >= 0 && isNumeric(tokens.get(i-1))){
                     terms.add(new Term(tokens.get(i-1)+"00B"));
-                    isTermed = true;
                 }
             }
-            if (isNumeric(token)){
+            else if (isNumeric(token)){
                 Double newToken = Double.parseDouble(token.replace(",",""));
                 if (newToken >= 1000 && newToken < 1000000){
                     newToken = newToken / 1000;
@@ -208,7 +204,6 @@ public class Parse {
                         tokenStr = tokenStr.replace(".0", "");
                     }
                     terms.add(new Term(tokenStr+"K"));
-                    isTermed = true;
                 }
                 else if (newToken >= 1000000 && newToken < 1000000000){
                     newToken = newToken / 1000000;
@@ -217,7 +212,6 @@ public class Parse {
                         tokenStr = tokenStr.replace(".0", "");
                     }
                     terms.add(new Term(tokenStr+"M"));
-                    isTermed = true;
                 }
                 else if (newToken >= 1000000000){
                     newToken = newToken / 1000000000;
@@ -226,26 +220,27 @@ public class Parse {
                         tokenStr = tokenStr.replace(".0", "");
                     }
                     terms.add(new Term(tokenStr+"B"));
-                    isTermed = true;
                 }
                 else if (newToken < 1000){
                     if (i+1 < tokens.size() && !(tokens.get(i+1).equals("Million") || tokens.get(i+1).equals("Billion") || tokens.get(i+1).equals("Trillion") || tokens.get(i+1).equals("Thousand"))){
                         terms.add(new Term(token));
-                        isTermed = true;
                     }
                 }
             }
-            if (isFraction(token)){
+            else if (isFraction(token)){
                 if(i-1 >= 0 && isNumeric(tokens.get(i-1))){
-                    Double newToken = Double.parseDouble(token.replace(",",""));
+                    Double newToken;
+                    if (tokens.get(i-1).contains(","))
+                        newToken = Double.parseDouble(tokens.get(i-1).replace(",",""));
+                    else
+                        newToken = Double.parseDouble(tokens.get(i-1));
                     if (newToken < 1000){
                         terms.add(new Term(tokens.get(i-1)+" "+token));
-                        isTermed = true;
                     }
                 }
             }
             // Evrey thing else
-            if (isTermed == false && !isNumeric(token) && !isFraction(token)){
+            else {
                 terms.add(new Term(token));
             }
         }

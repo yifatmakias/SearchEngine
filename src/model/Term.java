@@ -35,6 +35,6 @@ public class Term {
     public String toString() {
         return "Term{" +
                 "term='" + term + '\'' +
-                '}';
+                '}'+'\n';
     }
 }

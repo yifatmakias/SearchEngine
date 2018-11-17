@@ -8,7 +8,7 @@ import java.util.Locale;
 public class Doc {
     private String file_path;
     private String  docNumber;
-    private Date date;
+    private String date;
     private String title;
     private String text;
     private int max_tf;
@@ -41,13 +41,7 @@ public class Doc {
     }
 
     public void setDate(String date) {
-        DateFormat format = new SimpleDateFormat("d MMMM yyyy", Locale.ENGLISH);
-        try {
-            this.date = format.parse(date);
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
+        this.date = date;
     }
 
     public String getText() {

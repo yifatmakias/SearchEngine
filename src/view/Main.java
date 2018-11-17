@@ -10,6 +10,7 @@ import model.Parse;
 import model.ReadFile;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
@@ -33,7 +34,6 @@ public class Main extends Application {
         long start = 0;
         start = System.currentTimeMillis();
 
-        ReadFile readFile = new ReadFile("C:/Users/yifat/corpus/FB396001/FB396001");
         Set<String> stopWords = new HashSet<>();
         try {
             BufferedReader br = new BufferedReader(new FileReader("C:/Users/yifat/corpus/stop_words.txt"));
@@ -46,26 +46,27 @@ public class Main extends Application {
         catch (IOException e){
             e.printStackTrace();
         }
-        readFile.fillDocumentSet();
-        /**
-        Doc doc = readFile.getDocumentSet().iterator().next();
-        System.out.println(doc);
-        Parse parse = new Parse(doc.getText(), stopWords);
-        parse.parse();
-        System.out.println(parse.getTerms());
-        for (String stopWord: stopWords) {
-            if (parse.getTerms().contains(new Term(stopWord))){
-                System.out.println("not good");
-            }
-        }**/
 
-        for (Doc doc: readFile.getDocumentSet()) {
-            System.out.println(doc.getDocNumber());
-            Parse parse = new Parse(doc.getText(), stopWords);
-            parse.parse();
-            System.out.println(parse.getTerms());
+        File folder = new File("C:/Users/yifat/corpus/");
+        File[] files = folder.listFiles();
+        Parse parse = new Parse(stopWords);
+
+        for (File file:files)
+        {
+            if (file.isDirectory())
+            {
+                ReadFile readFile = new ReadFile(file.getAbsolutePath()+"\\"+file.getName());
+                readFile.fillDocumentSet();
+                for (Doc doc: readFile.getDocumentSet()) {
+                    //System.out.println(doc.getDocNumber());
+                    parse.parse(doc.getText());
+                }
+            }
         }
+        //System.out.println(parse.getTerms().size());
+        //System.out.println(parse.getTerms());
         durationMS += System.currentTimeMillis() - start;
+        System.out.println(parse.getTerms().size());
         System.out.println(durationMS);
 
 
