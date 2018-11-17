@@ -31,7 +31,7 @@ public class Main extends Application {
 
     public static void main(String[] args) {
         long durationMS = 0;
-        long start = 0;
+        long start;
         start = System.currentTimeMillis();
 
         Set<String> stopWords = new HashSet<>();
@@ -63,7 +63,7 @@ public class Main extends Application {
                 }
             }
         }
-        //System.out.println(parse.getTerms().size());
+        parse.removeStopWords();
         //System.out.println(parse.getTerms());
         durationMS += System.currentTimeMillis() - start;
         System.out.println(parse.getTerms().size());

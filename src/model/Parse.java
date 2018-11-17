@@ -7,15 +7,17 @@ public class Parse {
     private Set<Term> terms;
     private Set<String> stopWords;
     private Map<String, String> months;
+    private Set<Term> upperCaseWords;
 
     public Parse(Set<String> stopWords) {
         this.terms = new HashSet<>();
         this.stopWords = stopWords;
+        this.upperCaseWords = new HashSet<>();
         fillMonthDic();
     }
 
     public void parse(String text){
-        this.tokens = new ArrayList<>(Arrays.asList(text.split("\\s+")));
+        this.tokens = new ArrayList<>(Arrays.asList(text.split("([^0-9a-zA-Z%]+)?\\s+([^$0-9a-zA-Z]+)?")));
 
         for (int i = 0; i <tokens.size() ; i++) {
             String token = tokens.get(i);
@@ -24,35 +26,9 @@ public class Parse {
                 continue;
             }
 
-            if (token.charAt(token.length()-1) == ',' || token.charAt(token.length()-1) == '.' || token.charAt(token.length()-1) == ';' ||token.charAt(token.length()-1) == '?' || token.charAt(token.length()-1) == '!' || token.charAt(token.length()-1) == '-' || token.charAt(token.length()-1) == ':' || token.charAt(token.length()-1) == '"' || token.charAt(token.length()-1) == '}' || token.charAt(token.length()-1) == ')'){
-                token = token.substring(0,token.length()-1);
-            }
-
-            if (token.charAt(0) == ',' || token.charAt(0) == '.' || token.charAt(0) == ';' || token.charAt(0) == '?' || token.charAt(0) == '!' || token.charAt(0) == '-' || token.charAt(0) == ':' || token.charAt(0) == '"' || token.charAt(0) == '{' || token.charAt(0) == '('){
-                token = token.substring(1);
-            }
-
-            if (token.length() <= 1){
-                continue;
-            }
-            /**
             // upper and lower case letters.
             if (Character.isUpperCase(token.charAt(0))){
-                if (!tokens.contains(token.toLowerCase())){
-                    terms.add(new Term(token.toUpperCase()));
-                    continue;
-                }
-                else {
-                    terms.add(new Term(token.toLowerCase()));
-                    continue;
-                }
-            }
-             **/
-            // removing stop words.
-            if (stopWords.contains(token)){
-                terms.remove(new Term(token));
-                tokens.remove(i);
-                continue;
+                this.upperCaseWords.add(new Term(token.toUpperCase()));
             }
 
             // dealing with percentage.
@@ -221,7 +197,7 @@ public class Parse {
                     }
                     terms.add(new Term(tokenStr+"B"));
                 }
-                else if (newToken < 1000){
+                else {
                     if (i+1 < tokens.size() && !(tokens.get(i+1).equals("Million") || tokens.get(i+1).equals("Billion") || tokens.get(i+1).equals("Trillion") || tokens.get(i+1).equals("Thousand"))){
                         terms.add(new Term(token));
                     }
@@ -241,11 +217,24 @@ public class Parse {
             }
             // Evrey thing else
             else {
-                terms.add(new Term(token));
+                terms.add(new Term(token.toLowerCase()));
             }
         }
     }
 
+    public void removeStopWords(){
+        for (Iterator<Term> it = terms.iterator(); it.hasNext(); ) {
+            Term term = it.next();
+            if (this.upperCaseWords.contains(new Term(term.getTerm().toUpperCase()))){
+                upperCaseWords.remove(new Term(term.getTerm().toUpperCase()));
+                if (stopWords.contains(term.getTerm())){
+                    it.remove();
+                    stopWords.remove(term.getTerm());
+                }
+            }
+        }
+        this.terms.addAll(upperCaseWords);
+    }
 
 
     public Set<Term> getTerms() {
@@ -262,11 +251,11 @@ public class Parse {
 
     private boolean isNumeric(String str)
     {
-        return str.matches("-?\\d+(\\,\\d+)*(\\.\\d+)?");  //match a number with optional '-' and decimal.
+        return str.matches("-?\\d+(,\\d+)*(\\.\\d+)?");  //match a number with optional '-' and decimal.
     }
 
     private boolean isFraction(String str){
-        return str.matches("\\d+\\/\\d+|\\.\\d+");
+        return str.matches("\\d+/\\d+|\\.\\d+");
     }
 
     private void fillMonthDic(){
