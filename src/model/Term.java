@@ -18,6 +18,7 @@ public class Term {
         this.term = term;
     }
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -35,6 +36,6 @@ public class Term {
     public String toString() {
         return "Term{" +
                 "term='" + term + '\'' +
-                '}'+'\n';
+                '}';
     }
 }

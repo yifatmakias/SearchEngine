@@ -8,6 +8,7 @@ import javafx.stage.Stage;
 import model.Doc;
 import model.Parse;
 import model.ReadFile;
+import model.Stemmer;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -50,6 +51,7 @@ public class Main extends Application {
         File folder = new File("C:/Users/yifat/corpus/");
         File[] files = folder.listFiles();
         Parse parse = new Parse(stopWords);
+        Boolean toStem = false;
 
         for (File file:files)
         {
@@ -59,14 +61,20 @@ public class Main extends Application {
                 readFile.fillDocumentSet();
                 for (Doc doc: readFile.getDocumentSet()) {
                     //System.out.println(doc.getDocNumber());
-                    parse.parse(doc.getText());
+                    parse.parse(doc, toStem);
+                    doc.updateMaxtf();
+                    doc.updateUniqeWordsCount();
+                    //System.out.println(doc.getTerms());
+                    //System.out.println(doc.getMax_tf());
+                    //System.out.println(doc.getUniqueWordCount());
                 }
             }
         }
         parse.removeStopWords();
+        //System.out.println("________________________________________");
         //System.out.println(parse.getTerms());
-        durationMS += System.currentTimeMillis() - start;
         System.out.println(parse.getTerms().size());
+        durationMS += System.currentTimeMillis() - start;
         System.out.println(durationMS);
 
 

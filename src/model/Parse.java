@@ -8,20 +8,23 @@ public class Parse {
     private Set<String> stopWords;
     private Map<String, String> months;
     private Set<Term> upperCaseWords;
+    private Stemmer stemmer;
+
 
     public Parse(Set<String> stopWords) {
         this.terms = new HashSet<>();
         this.stopWords = stopWords;
         this.upperCaseWords = new HashSet<>();
+        this.stemmer = new Stemmer();
         fillMonthDic();
     }
 
-    public void parse(String text){
+    public void parse(Doc doc, Boolean toStem){
+        String text = doc.getText();
         this.tokens = new ArrayList<>(Arrays.asList(text.split("([^0-9a-zA-Z%]+)?\\s+([^$0-9a-zA-Z]+)?")));
 
         for (int i = 0; i <tokens.size() ; i++) {
             String token = tokens.get(i);
-
             if (token.length() <= 1){
                 continue;
             }
@@ -34,7 +37,8 @@ public class Parse {
             // dealing with percentage.
             if (token.equals("percent") || token.equals("percentage")){
                 if (i-1 >=0 && isNumeric(tokens.get(i-1))){
-                    terms.add(new Term(tokens.get(i-1)+"%"));
+                    Term term = new Term(tokens.get(i-1)+"%");
+                    addTerm(term, doc, toStem);
                 }
             }
 
@@ -43,7 +47,8 @@ public class Parse {
                 if (i-1 >= 0 && isNumeric(tokens.get(i-1))){
                     Double price = Double.parseDouble(tokens.get(i-1).replace(",",""));
                     if (price < 1000000){
-                        terms.add(new Term(tokens.get(i-1)+" Dollars"));
+                        Term term = new Term(tokens.get(i-1)+" Dollars");
+                        addTerm(term, doc, toStem);
                     }
                     else {
                         price = price / 1000000;
@@ -51,7 +56,8 @@ public class Parse {
                         if (priceStr.endsWith(".0")){
                             priceStr = priceStr.replace(".0", "");
                         }
-                        terms.add(new Term(priceStr+" M"+" Dollars"));
+                        Term term = new Term(priceStr+" M"+" Dollars");
+                        addTerm(term, doc, toStem);
                     }
                 }
                 else {
@@ -59,18 +65,21 @@ public class Parse {
                         if (i-2 >= 0 && isNumeric(tokens.get(i-2))){
                             Double price = Double.parseDouble(tokens.get(i-2).replace(",",""));
                             if (price < 1000000){
-                                terms.add(new Term(tokens.get(i-2)+" "+tokens.get(i-1)+" Dollars"));
+                                Term term = new Term(tokens.get(i-2)+" "+tokens.get(i-1)+" Dollars");
+                                addTerm(term, doc, toStem);
                             }
                         }
                     }
                     if (i-1 >=0 && tokens.get(i-1).equals("m")){
                         if (i-2 >= 0 && isNumeric(tokens.get(i-2))){
-                            terms.add(new Term(tokens.get(i-2)+" M"+" Dollars"));
+                            Term term = new Term(tokens.get(i-2)+" M"+" Dollars");
+                            addTerm(term, doc, toStem);
                         }
                     }
                     if (i-1 >=0 && tokens.get(i-1).equals("bn")){
                         if (i-2 >= 0 && isNumeric(tokens.get(i-2))){
-                            terms.add(new Term(tokens.get(i-2)+"000 M"+" Dollars"));
+                            Term term = new Term(tokens.get(i-2)+"000 M"+" Dollars");
+                            addTerm(term, doc, toStem);
                         }
                     }
                 }
@@ -78,15 +87,18 @@ public class Parse {
             else if (token.contains("$")){
                 String newToken = token.replace("$","");
                 if (i+1 < tokens.size() && tokens.get(i+1).equals("million")){
-                    terms.add(new Term(newToken+" M"+" Dollars"));
+                    Term term = new Term(newToken+" M"+" Dollars");
+                    addTerm(term, doc, toStem);
                 }
                 if (i+1 < tokens.size() && tokens.get(i+1).equals("billion")){
-                    terms.add(new Term(newToken+"000 M"+" Dollars"));
+                    Term term = new Term(newToken+"000 M"+" Dollars");
+                    addTerm(term, doc, toStem);
                 }
                 else if (isNumeric(newToken)){
                     Double price = Double.parseDouble(newToken.replace(",",""));
                     if (price < 1000000){
-                        terms.add(new Term(newToken+" Dollars"));
+                        Term term = new Term(newToken+" Dollars");
+                        addTerm(term, doc, toStem);
                     }
                     else {
                         price = price / 1000000;
@@ -94,7 +106,8 @@ public class Parse {
                         if (priceStr.endsWith(".0")){
                             priceStr = priceStr.replace(".0", "");
                         }
-                        terms.add(new Term(priceStr+" M"+" Dollars"));
+                        Term term = new Term(priceStr+" M"+" Dollars");
+                        addTerm(term, doc, toStem);
                     }
                 }
             }
@@ -103,17 +116,20 @@ public class Parse {
                 if (i-1 >=0 && tokens.get(i-1).equals("U.S.")){
                     if (i-2 >=0 && tokens.get(i-2).equals("million")){
                         if (i-3 >=0 && isNumeric(tokens.get(i-3))){
-                            terms.add(new Term(tokens.get(i-3)+" M"+" Dollars"));
+                            Term term = new Term(tokens.get(i-3)+" M"+" Dollars");
+                            addTerm(term, doc, toStem);
                         }
                     }
                     else if (i-2 >=0 && tokens.get(i-2).equals("billion")){
                         if (i-3 >=0 && isNumeric(tokens.get(i-3))){
-                            terms.add(new Term(tokens.get(i-3)+"000 M"+" Dollars"));
+                            Term term = new Term(tokens.get(i-3)+"000 M"+" Dollars");
+                            addTerm(term, doc, toStem);
                         }
                     }
                     else if (i-2 >=0 && tokens.get(i-2).equals("trillion")){
                         if (i-3 >=0 && isNumeric(tokens.get(i-3))){
-                            terms.add(new Term(tokens.get(i-3)+"000000 M"+" Dollars"));
+                            Term term = new Term(tokens.get(i-3)+"000000 M"+" Dollars");
+                            addTerm(term, doc, toStem);
                         }
                     }
                 }
@@ -123,21 +139,25 @@ public class Parse {
                 if (i-1 >= 0 && tokens.get(i-1).matches("[0-9]+")){
                     int date = Integer.valueOf(tokens.get(i-1));
                     if (date <= 31){
-                        terms.add(new Term(months.get(token)+"-"+date));
+                        Term term = new Term(months.get(token)+"-"+date);
+                        addTerm(term, doc, toStem);
                     }
                 }
                 if (i+1 < tokens.size() && tokens.get(i+1).matches("[0-9]+")){
                     int date = Integer.parseInt(tokens.get(i+1));
                     if (date <= 31){
                         if (date < 10){
-                            terms.add(new Term(months.get(token)+"-0"+date));
+                            Term term = new Term(months.get(token)+"-0"+date);
+                            addTerm(term, doc, toStem);
                         }
                         else {
-                            terms.add(new Term(months.get(token)+"-"+date));
+                            Term term = new Term(months.get(token)+"-"+date);
+                            addTerm(term, doc, toStem);
                         }
                     }
                     else {
-                        terms.add(new Term(date+"-"+months.get(token)));
+                        Term term = new Term(date+"-"+months.get(token));
+                        addTerm(term, doc, toStem);
                     }
                 }
             }
@@ -145,7 +165,8 @@ public class Parse {
                 if (i+1 < tokens.size() && isNumeric(tokens.get(i+1))){
                     if (i+2 < tokens.size() && tokens.get(i+2).equals("and")){
                         if (i+3 < tokens.size() && isNumeric(tokens.get(i+3))){
-                            terms.add(new Term(token+" "+tokens.get(i+1)+" "+tokens.get(i+2)+" "+tokens.get(i+3)));
+                            Term term = new Term(token+" "+tokens.get(i+1)+" "+tokens.get(i+2)+" "+tokens.get(i+3));
+                            addTerm(term, doc, toStem);
                         }
                     }
                 }
@@ -153,22 +174,26 @@ public class Parse {
             // Numbers
             else if (token.equals("Thousand")){
                 if (i-1 >= 0 && isNumeric(tokens.get(i-1))){
-                    terms.add(new Term(tokens.get(i-1)+"K"));
+                    Term term = new Term(tokens.get(i-1)+"K");
+                    addTerm(term, doc, toStem);
                 }
             }
             else if (token.equals("Million")){
                 if (i-1 >= 0 && isNumeric(tokens.get(i-1))){
-                    terms.add(new Term(tokens.get(i-1)+"M"));
+                    Term term = new Term(tokens.get(i-1)+"M");
+                    addTerm(term, doc, toStem);
                 }
             }
             else if (token.equals("Billion")){
                 if (i-1 >= 0 && isNumeric(tokens.get(i-1))){
-                    terms.add(new Term(tokens.get(i-1)+"B"));
+                    Term term = new Term(tokens.get(i-1)+"B");
+                    addTerm(term, doc, toStem);
                 }
             }
             else if (token.equals("Trillion")){
                 if (i-1 >= 0 && isNumeric(tokens.get(i-1))){
-                    terms.add(new Term(tokens.get(i-1)+"00B"));
+                    Term term = new Term(tokens.get(i-1)+"00B");
+                    addTerm(term, doc, toStem);
                 }
             }
             else if (isNumeric(token)){
@@ -179,7 +204,8 @@ public class Parse {
                     if (tokenStr.endsWith(".0")){
                         tokenStr = tokenStr.replace(".0", "");
                     }
-                    terms.add(new Term(tokenStr+"K"));
+                    Term term = new Term(tokenStr+"K");
+                    addTerm(term, doc, toStem);
                 }
                 else if (newToken >= 1000000 && newToken < 1000000000){
                     newToken = newToken / 1000000;
@@ -187,7 +213,8 @@ public class Parse {
                     if (tokenStr.endsWith(".0")){
                         tokenStr = tokenStr.replace(".0", "");
                     }
-                    terms.add(new Term(tokenStr+"M"));
+                    Term term = new Term(tokenStr+"M");
+                    addTerm(term, doc, toStem);
                 }
                 else if (newToken >= 1000000000){
                     newToken = newToken / 1000000000;
@@ -195,11 +222,13 @@ public class Parse {
                     if (tokenStr.endsWith(".0")){
                         tokenStr = tokenStr.replace(".0", "");
                     }
-                    terms.add(new Term(tokenStr+"B"));
+                    Term term = new Term(tokenStr+"B");
+                    addTerm(term, doc, toStem);
                 }
                 else {
                     if (i+1 < tokens.size() && !(tokens.get(i+1).equals("Million") || tokens.get(i+1).equals("Billion") || tokens.get(i+1).equals("Trillion") || tokens.get(i+1).equals("Thousand"))){
-                        terms.add(new Term(token));
+                        Term term = new Term(token);
+                        addTerm(term, doc, toStem);
                     }
                 }
             }
@@ -211,13 +240,15 @@ public class Parse {
                     else
                         newToken = Double.parseDouble(tokens.get(i-1));
                     if (newToken < 1000){
-                        terms.add(new Term(tokens.get(i-1)+" "+token));
+                        Term term = new Term(tokens.get(i-1)+" "+token);
+                        addTerm(term, doc, toStem);
                     }
                 }
             }
             // Evrey thing else
             else {
-                terms.add(new Term(token.toLowerCase()));
+                Term term = new Term(token.toLowerCase());
+                addTerm(term, doc, toStem);
             }
         }
     }
@@ -236,6 +267,18 @@ public class Parse {
         this.terms.addAll(upperCaseWords);
     }
 
+    public void addTerm(Term term, Doc doc, Boolean toStem){
+        if (toStem){
+            term = stemmer.stem(term);
+        }
+        if (doc.getTerms().containsKey(term)){
+            doc.setTerms(term, doc.getTerms().get(term) + 1);
+        }
+        else {
+            doc.setTerms(term, 1);
+        }
+        terms.add(term);
+    }
 
     public Set<Term> getTerms() {
         return terms;

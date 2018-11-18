@@ -2,8 +2,7 @@ package model;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
+import java.util.*;
 
 public class Doc {
     private String file_path;
@@ -14,7 +13,19 @@ public class Doc {
     private int max_tf;
     private int uniqueWordCount;
     private String city;
+    private Map<Term, Integer> terms;
 
+    public Doc() {
+        this.terms = new HashMap<>();
+    }
+
+    public Map<Term, Integer> getTerms() {
+        return terms;
+    }
+
+    public void setTerms(Term term, Integer tf) {
+        this.terms.put(term, tf);
+    }
 
     public String getCity() {
         return city;
@@ -61,6 +72,27 @@ public class Doc {
         this.text = text;
     }
 
+    public void updateUniqeWordsCount(){
+        uniqueWordCount = this.terms.size();
+    }
+
+    public void updateMaxtf(){
+        //max_tf = (Collections.max(terms.values()));
+        for (Iterator<HashMap.Entry<Term, Integer>> it = terms.entrySet().iterator(); it.hasNext(); ) {
+            HashMap.Entry<Term, Integer> pair = it.next();
+            if (pair.getValue() > this.max_tf){
+                this.max_tf = pair.getValue();
+            }
+        }
+    }
+
+    public int getMax_tf() {
+        return max_tf;
+    }
+
+    public int getUniqueWordCount() {
+        return uniqueWordCount;
+    }
 
     @Override
     public String toString() {
