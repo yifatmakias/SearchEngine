@@ -64,10 +64,18 @@ public class Main extends Application {
                     parse.parse(doc, toStem);
                     doc.updateMaxtf();
                     doc.updateUniqeWordsCount();
-                    //System.out.println(doc.getTerms());
-                    //System.out.println(doc.getMax_tf());
-                    //System.out.println(doc.getUniqueWordCount());
+                    /**
+                    System.out.println("terms:__________________________________________");
+                    System.out.println(doc.getTerms());
+                    System.out.println("maxtf:__________________________________________");
+                    System.out.println(doc.getMax_tf());
+                    System.out.println("uniqe words count:__________________________________________");
+                    System.out.println(doc.getUniqueWordCount());
+                    System.out.println("tf, line, index, isInTitle:__________________________________________");
+                    System.out.println(doc.getTerms().values());
+                     **/
                 }
+                break;
             }
         }
         parse.removeStopWords();
