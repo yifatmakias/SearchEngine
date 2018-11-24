@@ -30,8 +30,9 @@ public class ReadFile {
                 doc.setFile_path(this.path);
                 doc.setDate(element.getElementsByTag("DATE1").text());
                 doc.setTitle(element.getElementsByTag("TI").text());
-                doc.setDocNumber(element.getElementsByTag("DOCNO").text());
+                doc.setDocNumber(element.getElementsByTag("DOCNO").text().replaceAll(":","-"));
                 doc.setText(element.getElementsByTag("TEXT").text());
+                doc.setDocLength(doc.getText().length());
                 String city = element.getElementsByAttributeValue("P","104").text().split(" ")[0].toUpperCase();
                 doc.setCity(city);
                 documentSet.add(doc);

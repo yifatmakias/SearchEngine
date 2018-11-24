@@ -1,13 +1,45 @@
 package model;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 
 public class Term {
     private String term;
-
+    private int df;
+    private int tfInCorpus;
+    // map of the documents of the term.
+    // data in list - tf - in doc, docLength, isInTitle, positions in doc
+    private HashMap<String, List<Integer>> documents;
 
     public Term(String term) {
         this.term = term;
+        this.df = 0;
+        this.tfInCorpus = 0;
+        documents = new HashMap<>();
+    }
+
+    public HashMap<String, List<Integer>> getDocuments() {
+        return documents;
+    }
+
+    public void addNewDocument(String docNumber,int docLength , int inTitle, int position) {
+        List<Integer> termData = new ArrayList<>();
+        termData.add(1);
+        termData.add(docLength);
+        termData.add(inTitle);
+        termData.add(position);
+        this.df++;
+        this.tfInCorpus++;
+        documents.put(docNumber, termData);
+    }
+
+    public void setExistingDoc(String docNumber, int position){
+        List<Integer> termData = documents.get(docNumber);
+        termData.set(0,termData.get(0)+1);
+        termData.add(position);
+        this.tfInCorpus++;
     }
 
     public String getTerm() {
@@ -18,6 +50,13 @@ public class Term {
         this.term = term;
     }
 
+    public int getDf() {
+        return df;
+    }
+
+    public int getTfInCorpus() {
+        return tfInCorpus;
+    }
 
     @Override
     public boolean equals(Object o) {
