@@ -33,6 +33,10 @@ public class Parse {
         for (int i = 0; i <tokens.size() ; i++) {
             String token = tokens.get(i);
 
+            if (token.contains("*")){
+                token = token.replaceAll("\\*", "");
+            }
+
             if (token.contains("<") || token.contains(">")){
                 continue;
             }

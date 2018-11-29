@@ -1,6 +1,5 @@
 package view;
 
-import com.sun.xml.internal.messaging.saaj.util.ByteInputStream;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -10,8 +9,6 @@ import model.*;
 
 import java.io.*;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Main extends Application {
 
@@ -50,7 +47,7 @@ public class Main extends Application {
         int fileCounter = 0;
         int fileCounterIndex = 0;
         int docNum = 0;
-
+/**
         for (File file:files)
         {
             if (file.isDirectory())
@@ -75,13 +72,13 @@ public class Main extends Application {
                 }
                 fileCounter++;
             }
-        }
+        }**/
         //System.out.println(docNum);
         //Merge merge = new Merge("C:/Users/yifat/postingDir/");
         //merge.merge();
-        /**
+
         try {
-            FileReader file = new FileReader("C:/Users/yifat/postingDir/1813");
+            FileReader file = new FileReader("C:/Users/yifat/postingDir/mergedPosting");
             BufferedReader br = new BufferedReader(file);
             int lineNumber = 0;
             String line;
@@ -93,7 +90,7 @@ public class Main extends Application {
         }
         catch (Exception e){
             e.printStackTrace();
-        }**/
+        }
 
         //System.out.println("________________________________________");
         //System.out.println(parse.getTerms());

@@ -3,12 +3,10 @@ package model;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.Files;
 import java.util.*;
 
 public class Indexer implements Runnable {
 
-    //private Map<String, List<Integer>> dictionary;
     private String postingPath;
     private Boolean isStemmed;
     private int fileNum;
@@ -37,7 +35,7 @@ public class Indexer implements Runnable {
                 String lineToWrite = "";
                 String tfInCorpusString = String.valueOf(termsMap.get(term).getTfInCorpus());
                 String dfString = String.valueOf(termsMap.get(term).getDf());
-                lineToWrite = term+"$";
+                lineToWrite = term+"*";
                 //lineToWrite = term+";"+tfInCorpusString+";"+dfString+"$";
                 for (Iterator<Map.Entry<String, List<Integer>>> it = termsMap.get(term).getDocuments().entrySet().iterator(); it.hasNext(); ) {
                     Map.Entry<String, List<Integer>> entry = it.next();
