@@ -33,14 +33,24 @@ public class Parse {
         for (int i = 0; i <tokens.size() ; i++) {
             String token = tokens.get(i);
 
+            if (token.contains("<") || token.contains(">")){
+                continue;
+            }
+
+            if (token.contains(";")){
+                token.replaceAll(";","");
+            }
+
             if (token.length() <= 1){
                 continue;
             }
 
+            /**
             // upper and lower case letters.
             if (Character.isUpperCase(token.charAt(0))){
                 this.upperCaseWords.put(token.toUpperCase(), new Term(token.toUpperCase()));
-            }
+            }**/
+
 
             // dealing with percentage.
             if (token.equals("percent") || token.equals("percentage")){
@@ -163,15 +173,6 @@ public class Parse {
                         addTerm(stringTerm, doc, toStem, indexInText);                     }
                 }
             }
-            else if (token.equals("between") || token.equals("Between")){
-                if (i+1 < tokens.size() && isNumeric(tokens.get(i+1))){
-                    if (i+2 < tokens.size() && tokens.get(i+2).equals("and")){
-                        if (i+3 < tokens.size() && isNumeric(tokens.get(i+3))){
-                            String stringTerm = token+" "+tokens.get(i+1)+" "+tokens.get(i+2)+" "+tokens.get(i+3);
-                            addTerm(stringTerm, doc, toStem, indexInText);                           }
-                    }
-                }
-            }
             // Numbers
             else if (token.equals("Thousand")){
                 if (i-1 >= 0 && isNumeric(tokens.get(i-1))){
@@ -202,7 +203,7 @@ public class Parse {
                         tokenStr = tokenStr.replace(".0", "");
                     }
                     else {
-                       tokenStr = convertBigDecimalNum(tokenStr);
+                        tokenStr = convertBigDecimalNum(tokenStr);
                     }
                     String stringTerm = tokenStr+"K";
                     addTerm(stringTerm, doc, toStem, indexInText);
@@ -254,6 +255,16 @@ public class Parse {
                     }
                 }
             }
+            else if (token.equals("between") || token.equals("Between")){
+                if (i+1 < tokens.size() && isNumeric(tokens.get(i+1))){
+                    if (i+2 < tokens.size() && tokens.get(i+2).equals("and")){
+                        if (i+3 < tokens.size() && isNumeric(tokens.get(i+3))){
+                            String stringTerm = token+" "+tokens.get(i+1)+" "+tokens.get(i+2)+" "+tokens.get(i+3);
+                            addTerm(stringTerm, doc, toStem, indexInText);                           }
+                    }
+                }
+            }
+
             else if (token.contains("/")){
                 String [] splitTokens = token.split("/");
                 for (String splitedToken: splitTokens) {
@@ -263,13 +274,21 @@ public class Parse {
             }
             // Evrey thing else
             else {
-                token = token.toLowerCase().replaceAll(";","");
-                if (token.charAt(0) == '"' || token.charAt(0) == '\''){
+                token = token.toLowerCase();
+                token = token.replaceAll(";","");
+                token = token.replaceAll("\\(","");
+                token = token.replaceAll("\\)","");
+                token = token.replaceAll("\"","");
+                token = token.replaceAll("'s","");
+
+                if (token.charAt(0) == '"' || token.charAt(0) == '\''|| token.charAt(0) == '.' || token.charAt(0) == '|'){
                     token = token.substring(1);
                 }
-                if (token.charAt(token.length()-1) == '"' || token.charAt(token.length()-1) == '\''){
+                if (token.charAt(token.length()-1) == '"' || token.charAt(token.length()-1) == '\''|| token.charAt(token.length()-1) == '.' || token.charAt(token.length()-1) == '|'){
                     token = token.substring(0, token.length()-1);
                 }
+                if (token.length() <= 1)
+                    continue;
                 String stringTerm = token.toLowerCase().replaceAll(";","");
                 addTerm(stringTerm, doc, toStem, indexInText);
             }
@@ -317,15 +336,18 @@ public class Parse {
         for (Iterator<Map.Entry<String, Term>> it = terms.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry<String, Term> entry = it.next();
             Term term = entry.getValue();
+            if (stopWords.contains(term.getTerm())) {
+                it.remove();
+            }/**
             if (this.upperCaseWords.containsKey(term.getTerm().toUpperCase())){
                 upperCaseWords.remove(term.getTerm().toUpperCase());
                 if (stopWords.contains(term.getTerm())){
                     it.remove();
                     stopWords.remove(term.getTerm());
                 }
-            }
+            }**/
         }
-        this.terms.putAll(upperCaseWords);
+        //this.terms.putAll(upperCaseWords);
     }
 
     public void addTerm(String stringTerm, Doc doc, Boolean toStem, int indexInText){

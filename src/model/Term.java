@@ -29,7 +29,7 @@ public class Term {
         termData.add(1);
         termData.add(docLength);
         termData.add(inTitle);
-        termData.add(position);
+        //termData.add(position);
         this.df++;
         this.tfInCorpus++;
         documents.put(docNumber, termData);
@@ -38,7 +38,7 @@ public class Term {
     public void setExistingDoc(String docNumber, int position){
         List<Integer> termData = documents.get(docNumber);
         termData.set(0,termData.get(0)+1);
-        termData.add(position);
+        //termData.add(position);
         this.tfInCorpus++;
     }
 

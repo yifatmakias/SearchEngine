@@ -1,5 +1,6 @@
 package view;
 
+import com.sun.xml.internal.messaging.saaj.util.ByteInputStream;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -7,10 +8,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import model.*;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,6 +27,8 @@ public class Main extends Application {
         long durationMS = 0;
         long start;
         start = System.currentTimeMillis();
+
+
 
         Set<String> stopWords = new HashSet<>();
         try {
@@ -49,13 +49,13 @@ public class Main extends Application {
         Boolean toStem = false;
         int fileCounter = 0;
         int fileCounterIndex = 0;
+        int docNum = 0;
 
         for (File file:files)
         {
             if (file.isDirectory())
             {
-                fileCounter++;
-                if (fileCounter == 10){
+                if (fileCounter == 40){
                     fileCounterIndex++;
                     parse.removeStopWords();
                     //System.out.println(parse.getTerms().size());
@@ -69,28 +69,32 @@ public class Main extends Application {
                 readFile.fillDocumentSet();
                 for (Doc doc: readFile.getDocumentSet()) {
                     //System.out.println(doc.getDocNumber());
+                    docNum++;
                     parse.parse(doc,null , toStem);
                     doc.setText("");
-                    /**
-                    if (doc.getDocNumber().equals("FBIS3-1")){
-                        for (Iterator<Map.Entry<String, Term>> it = parse.getTerms().entrySet().iterator(); it.hasNext(); ) {
-                            Map.Entry<String, Term> entry = it.next();
-                            Term term = entry.getValue();
-                            if (term.getDocuments().containsKey("FBIS3-1")){
-                                System.out.println("term:__________________________________________");
-                                System.out.println(term.getTerm());
-                                System.out.println("maxtf:__________________________________________");
-                                System.out.println(doc.getMax_tf());
-                                System.out.println("uniqe words count:__________________________________________");
-                                System.out.println(doc.getUniqueWordCount());
-                                System.out.println("tf, isInTitle, position, :__________________________________________");
-                                System.out.println(term.getDocuments().get("FBIS3-1"));
-                            }
-                        }
-                    }**/
                 }
+                fileCounter++;
             }
         }
+        //System.out.println(docNum);
+        //Merge merge = new Merge("C:/Users/yifat/postingDir/");
+        //merge.merge();
+        /**
+        try {
+            FileReader file = new FileReader("C:/Users/yifat/postingDir/1813");
+            BufferedReader br = new BufferedReader(file);
+            int lineNumber = 0;
+            String line;
+            while ((line = br.readLine()) != null){
+                System.out.println(line);
+                lineNumber++;
+            }
+            System.out.println(lineNumber);
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }**/
+
         //System.out.println("________________________________________");
         //System.out.println(parse.getTerms());
         durationMS += System.currentTimeMillis() - start;

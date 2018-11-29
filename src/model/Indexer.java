@@ -3,6 +3,7 @@ package model;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
 import java.util.*;
 
 public class Indexer implements Runnable {
@@ -36,28 +37,29 @@ public class Indexer implements Runnable {
                 String lineToWrite = "";
                 String tfInCorpusString = String.valueOf(termsMap.get(term).getTfInCorpus());
                 String dfString = String.valueOf(termsMap.get(term).getDf());
-                lineToWrite = term+";"+tfInCorpusString+";"+dfString+":";
+                lineToWrite = term+"$";
+                //lineToWrite = term+";"+tfInCorpusString+";"+dfString+"$";
                 for (Iterator<Map.Entry<String, List<Integer>>> it = termsMap.get(term).getDocuments().entrySet().iterator(); it.hasNext(); ) {
                     Map.Entry<String, List<Integer>> entry = it.next();
-                    String docData = entry.getKey()+":";
+                    String docData = entry.getKey()+"$";
                     List<Integer> listDocData = entry.getValue();
+                    docData = docData + String.valueOf(listDocData.get(0));
+                    /**
                     for (Integer val: listDocData) {
                         docData = docData + String.valueOf(val)+",";
-                    }
-                    docData = docData.substring(0,docData.length()-1);
-                    docData = docData+":";
+                    }**/
+                    //docData = docData.substring(0,docData.length()-1);
+                    docData = docData+"$";
                     lineToWrite = lineToWrite + docData;
                 }
                 lineToWrite = lineToWrite.substring(0, lineToWrite.length()-1);
                 printWriter.println(lineToWrite);
             }
+            printWriter.flush();
             printWriter.close();
         }
         catch (IOException e){
             e.printStackTrace();
-        }
-        for (String term: termsByOrder) {
-
         }
     }
 }
