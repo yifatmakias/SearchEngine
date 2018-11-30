@@ -82,6 +82,10 @@ public class Doc {
         this.uniqueWordCount = uniqueWordCount;
     }
 
+    public String getFile_path() {
+        return file_path;
+    }
+
     @Override
     public String toString() {
         return "Doc{" +

@@ -8,13 +8,11 @@ import java.util.*;
 public class Indexer implements Runnable {
 
     private String postingPath;
-    private Boolean isStemmed;
     private int fileNum;
     Map<String, Term> termsMap;
 
     public Indexer(String postingPath, Boolean isStemmed, int fileNum, Map<String, Term> termsMap) {
         this.postingPath = postingPath;
-        this.isStemmed = isStemmed;
         this.fileNum = fileNum;
         this.termsMap = termsMap;
     }
@@ -35,18 +33,18 @@ public class Indexer implements Runnable {
                 String lineToWrite = "";
                 String tfInCorpusString = String.valueOf(termsMap.get(term).getTfInCorpus());
                 String dfString = String.valueOf(termsMap.get(term).getDf());
-                lineToWrite = term+"*";
-                //lineToWrite = term+";"+tfInCorpusString+";"+dfString+"$";
+                //lineToWrite = term+"*";
+                lineToWrite = term+";"+tfInCorpusString+";"+dfString+"*";
                 for (Iterator<Map.Entry<String, List<Integer>>> it = termsMap.get(term).getDocuments().entrySet().iterator(); it.hasNext(); ) {
                     Map.Entry<String, List<Integer>> entry = it.next();
                     String docData = entry.getKey()+"$";
                     List<Integer> listDocData = entry.getValue();
-                    docData = docData + String.valueOf(listDocData.get(0));
-                    /**
+                    //docData = docData + String.valueOf(listDocData.get(0));
+
                     for (Integer val: listDocData) {
                         docData = docData + String.valueOf(val)+",";
-                    }**/
-                    //docData = docData.substring(0,docData.length()-1);
+                    }
+                    docData = docData.substring(0,docData.length()-1);
                     docData = docData+"$";
                     lineToWrite = lineToWrite + docData;
                 }
