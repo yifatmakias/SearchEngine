@@ -12,5 +12,6 @@
     <orderEntry type="library" exported="" name="jsoup-1.11.3" level="project" />
     <orderEntry type="library" exported="" name="opennlp-tools-1.8.0" level="project" />
     <orderEntry type="library" exported="" name="org.json" level="project" />
+    <orderEntry type="library" exported="" name="common-lang3" level="project" />
   </component>
 </module>

@@ -8,12 +8,14 @@ public class Merge {
     private String postingPath;
     private Map<String, Boolean> upperLowerDic;
     private boolean toStem;
+    private Map<String, List<String>> cityMap;
 
 
-    public Merge(String postingPath, Map<String, Boolean> upperLowerDic, boolean toStem) {
+    public Merge(String postingPath, Map<String, Boolean> upperLowerDic, boolean toStem, Map<String, List<String>> cityMap) {
         this.postingPath = postingPath;
         this.upperLowerDic = upperLowerDic;
         this.toStem = toStem;
+        this.cityMap = cityMap;
     }
 
     public void merge(){
@@ -29,6 +31,7 @@ public class Merge {
             }
             int lineNumber = 0;
             PrintWriter printWriter = new PrintWriter(postingPath+"mergedPosting");
+            PrintWriter printWriterCities = new PrintWriter(postingPath+"mergedPostingCities");
             for (int i = 0; i < bufferedReaders.length; i++) {
                 lines[i] = bufferedReaders[i].readLine();
             }
@@ -59,13 +62,10 @@ public class Merge {
                 }
             }
             while (!linesToSort.isEmpty()){
-
                 String minLine = linesToSort.remove();
                 String [] splitLine1 = minLine.split("\\*");
                 String [] dicData1 = splitLine1[0].split(";");
                 String termMinLine = dicData1[0];
-
-
                 List<String> termsToMerge = new ArrayList<>();
                 for (int i = 0; i <lines.length ; i++) {
                     if (lines[i] != null){
@@ -83,14 +83,26 @@ public class Merge {
                     }
                 }
                 if (termsToMerge.size() <= 1){
-                    if (termMinLine.chars().allMatch(Character::isLetter) && !upperLowerDic.get(termMinLine)){
+                    if (upperLowerDic.containsKey(termMinLine) && !upperLowerDic.get(termMinLine)){
                         minLine = termMinLine.toUpperCase() +";"+ dicData1[1]+";"+dicData1[2]+"*"+splitLine1[1];
                     }
-                    printWriter.println(minLine);
+                    if (cityMap.containsKey(termMinLine.toUpperCase())){
+                        printWriterCities.println(minLine);
+                    }
+                    else {
+                        printWriter.println(minLine);
+                    }
                 }
                 else {
                     String mergeLine = mergeLines(termsToMerge);
-                    printWriter.println(mergeLine);
+                    String [] splitLine = mergeLine.split("\\*");
+                    String [] dicData = splitLine[0].split(";");
+                    if (cityMap.containsKey(dicData[0].toUpperCase())){
+                        printWriterCities.println(mergeLine);
+                    }
+                    else {
+                        printWriter.println(mergeLine);
+                    }
                 }
             }
             for (int i = 0; i <bufferedReaders.length ; i++) {
@@ -99,6 +111,8 @@ public class Merge {
             }
             printWriter.flush();
             printWriter.close();
+            printWriterCities.flush();
+            printWriterCities.close();
         }
         catch (IOException e){
             e.printStackTrace();
@@ -110,7 +124,8 @@ public class Merge {
         String [] splitLine = termsToMerge.get(0).split("\\*");
         String [] dicData = splitLine[0].split(";");
         String termName = dicData[0];
-        if (termName.chars().allMatch(Character::isLetter) && !upperLowerDic.get(termName)) {
+
+        if (upperLowerDic.containsKey(termName) && !upperLowerDic.get(termName)) {
             mergedLine = termName.toUpperCase()+";";
         }
         else {
@@ -168,6 +183,46 @@ public class Merge {
             postWriter.close();
             br.close();
             File mergedPostingFile = new File(this.postingPath+"mergedPosting");
+            mergedPostingFile.delete();
+        }
+        catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    public void separateCitiesPosting(){
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(this.postingPath+"mergedPostingCities"));
+            PrintWriter dicWriter = new PrintWriter(this.postingPath+"citiesDictionaryFile");
+            PrintWriter postWriter= new PrintWriter(this.postingPath+"citiesPostingFile");
+
+            String line = br.readLine();
+            long seekNum = 0;
+            while (line != null){
+                String [] spliteLine = line.split("\\*");
+                String dicLine = spliteLine[0];
+                String cityName = dicLine.split(";")[0];
+                List<String> listCityDetails = cityMap.get(cityName.toUpperCase());
+                String cityDetails;
+                if (listCityDetails.size() == 3){
+                    cityDetails = listCityDetails.get(0) + ";" + listCityDetails.get(1) + ";" + listCityDetails.get(2);
+                    dicLine = cityName + ";" + cityDetails + ";" + String.valueOf(seekNum);
+                }
+                else {
+                    dicLine = cityName + ";" + String.valueOf(seekNum);
+                }
+                String postLine = spliteLine[1];
+                dicWriter.println(dicLine);
+                postWriter.println(postLine);
+                line = br.readLine();
+                seekNum += postLine.getBytes().length+2;
+            }
+            dicWriter.flush();
+            postWriter.flush();
+            dicWriter.close();
+            postWriter.close();
+            br.close();
+            File mergedPostingFile = new File(this.postingPath+"mergedPostingCities");
             mergedPostingFile.delete();
         }
         catch (IOException e){

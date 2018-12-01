@@ -9,14 +9,16 @@ public class Term {
     private String term;
     private int df;
     private int tfInCorpus;
+    private int ruleNumber;
     // map of the documents of the term.
     // data in list - tf - in doc, docLength, isInTitle, positions in doc
     private HashMap<String, List<Integer>> documents;
 
-    public Term(String term) {
+    public Term(String term, int ruleNumber) {
         this.term = term;
         this.df = 0;
         this.tfInCorpus = 0;
+        this.ruleNumber = ruleNumber;
         documents = new HashMap<>();
     }
 
@@ -27,7 +29,7 @@ public class Term {
     public void addNewDocument(String docNumber,int docLength , int inTitle, int position) {
         List<Integer> termData = new ArrayList<>();
         termData.add(1);
-        termData.add(docLength);
+        //termData.add(docLength);
         termData.add(inTitle);
         termData.add(position);
         this.df++;
@@ -56,6 +58,10 @@ public class Term {
 
     public int getTfInCorpus() {
         return tfInCorpus;
+    }
+
+    public int getRuleNumber() {
+        return ruleNumber;
     }
 
     @Override

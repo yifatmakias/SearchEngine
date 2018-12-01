@@ -2,6 +2,8 @@ package model;
 
 import java.util.*;
 
+import static org.apache.commons.lang3.StringUtils.*;
+
 public class Parse {
     private List<String> tokens;
     private Map<String, Term> terms;
@@ -19,6 +21,12 @@ public class Parse {
         this.upperLowerDic = upperLowerDic;
     }
 
+    public Parse() {
+        this.terms = new HashMap<>();
+        this.stemmer = new Stemmer();
+        fillMonthDic();
+    }
+
     public void parse(Doc doc, String textToParse, Boolean toStem) {
         String text;
         if (doc != null) {
@@ -31,37 +39,48 @@ public class Parse {
         for (int i = 0; i < tokens.size(); i++) {
             String token = tokens.get(i);
 
-            if (token.contains("*")) {
-                token = token.replaceAll("\\*", "");
-            }
+            // remove special characters
+            token = replaceChars(token, "*", "");
+            token = replaceChars(token, ";", "");
+            token = replaceChars(token, "(", "");
+            token = replaceChars(token, ")", "");
+            token = replaceChars(token, "\"", "");
+            token = replaceChars(token, "|", "");
+            token = replaceChars(token, "'", "");
+            token = replaceChars(token, "]", "");
+            token = replaceChars(token, "[", "");
+            token = replaceChars(token, "&", "");
+            token = replaceChars(token, "<", "");
+            token = replaceChars(token, ">", "");
 
+
+            token = token.replaceAll("[^\\p{Print}\\t\\n]", "");
+
+
+            /**
             if (token.contains("<") || token.contains(">")) {
                 continue;
-            }
-
-            if (token.contains(";")) {
-                token.replaceAll(";", "");
-            }
+            }**/
 
             if (token.length() <= 1) {
                 continue;
             }
 
-            // dealing with percentage.
+            // dealing with percentage - 1
             if (token.equals("percent") || token.equals("percentage")) {
                 if (i - 1 >= 0 && isNumeric(tokens.get(i - 1))) {
                     String stringTerm = tokens.get(i - 1) + "%";
-                    addTerm(stringTerm, doc, toStem, indexInText);
+                    addTerm(stringTerm, doc, toStem, indexInText, 1);
                 }
             }
 
-            // prices
+            // prices - 2
             else if (token.equals("Dollars")) {
                 if (i - 1 >= 0 && isNumeric(tokens.get(i - 1))) {
                     Double price = Double.parseDouble(tokens.get(i - 1).replace(",", ""));
                     if (price < 1000000) {
                         String stringTerm = tokens.get(i - 1) + " Dollars";
-                        addTerm(stringTerm, doc, toStem, indexInText);
+                        addTerm(stringTerm, doc, toStem, indexInText, 2);
                     } else {
                         price = price / 1000000;
                         String priceStr = price.toString();
@@ -69,7 +88,7 @@ public class Parse {
                             priceStr = priceStr.replace(".0", "");
                         }
                         String stringTerm = priceStr + " M" + " Dollars";
-                        addTerm(stringTerm, doc, toStem, indexInText);
+                        addTerm(stringTerm, doc, toStem, indexInText, 2);
                     }
                 } else {
                     if (i - 1 >= 0 && isFraction(tokens.get(i - 1))) {
@@ -77,20 +96,20 @@ public class Parse {
                             Double price = Double.parseDouble(tokens.get(i - 2).replace(",", ""));
                             if (price < 1000000) {
                                 String stringTerm = tokens.get(i - 2) + " " + tokens.get(i - 1) + " Dollars";
-                                addTerm(stringTerm, doc, toStem, indexInText);
+                                addTerm(stringTerm, doc, toStem, indexInText,2 );
                             }
                         }
                     }
                     if (i - 1 >= 0 && tokens.get(i - 1).equals("m")) {
                         if (i - 2 >= 0 && isNumeric(tokens.get(i - 2))) {
                             String stringTerm = tokens.get(i - 2) + " M" + " Dollars";
-                            addTerm(stringTerm, doc, toStem, indexInText);
+                            addTerm(stringTerm, doc, toStem, indexInText,2 );
                         }
                     }
                     if (i - 1 >= 0 && tokens.get(i - 1).equals("bn")) {
                         if (i - 2 >= 0 && isNumeric(tokens.get(i - 2))) {
                             String stringTerm = tokens.get(i - 2) + "000 M" + " Dollars";
-                            addTerm(stringTerm, doc, toStem, indexInText);
+                            addTerm(stringTerm, doc, toStem, indexInText, 2);
                         }
                     }
                 }
@@ -98,16 +117,16 @@ public class Parse {
                 String newToken = token.replace("$", "");
                 if (i + 1 < tokens.size() && tokens.get(i + 1).equals("million")) {
                     String stringTerm = newToken + " M" + " Dollars";
-                    addTerm(stringTerm, doc, toStem, indexInText);
+                    addTerm(stringTerm, doc, toStem, indexInText,2 );
                 }
                 if (i + 1 < tokens.size() && tokens.get(i + 1).equals("billion")) {
                     String stringTerm = newToken + "000 M" + " Dollars";
-                    addTerm(stringTerm, doc, toStem, indexInText);
+                    addTerm(stringTerm, doc, toStem, indexInText, 2);
                 } else if (isNumeric(newToken)) {
                     Double price = Double.parseDouble(newToken.replace(",", ""));
                     if (price < 1000000) {
                         String stringTerm = newToken + " Dollars";
-                        addTerm(stringTerm, doc, toStem, indexInText);
+                        addTerm(stringTerm, doc, toStem, indexInText,2);
                     } else {
                         price = price / 1000000;
                         String priceStr = price.toString();
@@ -115,7 +134,7 @@ public class Parse {
                             priceStr = priceStr.replace(".0", "");
                         }
                         String stringTerm = priceStr + " M" + " Dollars";
-                        addTerm(stringTerm, doc, toStem, indexInText);
+                        addTerm(stringTerm, doc, toStem, indexInText,2);
                     }
                 }
             } else if (token.equals("dollars")) {
@@ -123,28 +142,28 @@ public class Parse {
                     if (i - 2 >= 0 && tokens.get(i - 2).equals("million")) {
                         if (i - 3 >= 0 && isNumeric(tokens.get(i - 3))) {
                             String stringTerm = tokens.get(i - 3) + " M" + " Dollars";
-                            addTerm(stringTerm, doc, toStem, indexInText);
+                            addTerm(stringTerm, doc, toStem, indexInText, 2);
                         }
                     } else if (i - 2 >= 0 && tokens.get(i - 2).equals("billion")) {
                         if (i - 3 >= 0 && isNumeric(tokens.get(i - 3))) {
                             String stringTerm = tokens.get(i - 3) + "000 M" + " Dollars";
-                            addTerm(stringTerm, doc, toStem, indexInText);
+                            addTerm(stringTerm, doc, toStem, indexInText, 2);
                         }
                     } else if (i - 2 >= 0 && tokens.get(i - 2).equals("trillion")) {
                         if (i - 3 >= 0 && isNumeric(tokens.get(i - 3))) {
                             String stringTerm = tokens.get(i - 3) + "000000 M" + " Dollars";
-                            addTerm(stringTerm, doc, toStem, indexInText);
+                            addTerm(stringTerm, doc, toStem, indexInText, 2);
                         }
                     }
                 }
             }
-            // dates
+            // dates - 3
             else if (months.containsKey(token)) {
                 if (i - 1 >= 0 && tokens.get(i - 1).matches("[0-9]+")) {
                     int date = Integer.valueOf(tokens.get(i - 1));
                     if (date <= 31) {
                         String stringTerm = months.get(token) + "-" + date;
-                        addTerm(stringTerm, doc, toStem, indexInText);
+                        addTerm(stringTerm, doc, toStem, indexInText, 3);
                     }
                 }
                 if (i + 1 < tokens.size() && tokens.get(i + 1).matches("[0-9]+")) {
@@ -152,37 +171,37 @@ public class Parse {
                     if (date <= 31) {
                         if (date < 10) {
                             String stringTerm = months.get(token) + "-0" + date;
-                            addTerm(stringTerm, doc, toStem, indexInText);
+                            addTerm(stringTerm, doc, toStem, indexInText, 3);
                         } else {
                             String stringTerm = months.get(token) + "-" + date;
-                            addTerm(stringTerm, doc, toStem, indexInText);
+                            addTerm(stringTerm, doc, toStem, indexInText, 3);
                         }
                     } else {
                         String stringTerm = date + "-" + months.get(token);
-                        addTerm(stringTerm, doc, toStem, indexInText);
+                        addTerm(stringTerm, doc, toStem, indexInText, 3);
                     }
                 }
             }
-            // Numbers
+            // Numbers - 4
             else if (token.equals("Thousand")) {
                 if (i - 1 >= 0 && isNumeric(tokens.get(i - 1))) {
                     String stringTerm = tokens.get(i - 1) + "K";
-                    addTerm(stringTerm, doc, toStem, indexInText);
+                    addTerm(stringTerm, doc, toStem, indexInText, 4);
                 }
             } else if (token.equals("Million")) {
                 if (i - 1 >= 0 && isNumeric(tokens.get(i - 1))) {
                     String stringTerm = tokens.get(i - 1) + "M";
-                    addTerm(stringTerm, doc, toStem, indexInText);
+                    addTerm(stringTerm, doc, toStem, indexInText, 4);
                 }
             } else if (token.equals("Billion")) {
                 if (i - 1 >= 0 && isNumeric(tokens.get(i - 1))) {
                     String stringTerm = tokens.get(i - 1) + "B";
-                    addTerm(stringTerm, doc, toStem, indexInText);
+                    addTerm(stringTerm, doc, toStem, indexInText, 4);
                 }
             } else if (token.equals("Trillion")) {
                 if (i - 1 >= 0 && isNumeric(tokens.get(i - 1))) {
                     String stringTerm = tokens.get(i - 1) + "00B";
-                    addTerm(stringTerm, doc, toStem, indexInText);
+                    addTerm(stringTerm, doc, toStem, indexInText, 4);
                 }
             } else if (isNumeric(token)) {
                 Double newToken = Double.parseDouble(token.replace(",", ""));
@@ -195,7 +214,7 @@ public class Parse {
                         tokenStr = convertBigDecimalNum(tokenStr);
                     }
                     String stringTerm = tokenStr + "K";
-                    addTerm(stringTerm, doc, toStem, indexInText);
+                    addTerm(stringTerm, doc, toStem, indexInText, 4);
                 } else if (newToken >= 1000000 && newToken < 1000000000) {
                     newToken = newToken / 1000000;
                     String tokenStr = newToken.toString();
@@ -205,7 +224,7 @@ public class Parse {
                         tokenStr = convertBigDecimalNum(tokenStr);
                     }
                     String stringTerm = tokenStr + "M";
-                    addTerm(stringTerm, doc, toStem, indexInText);
+                    addTerm(stringTerm, doc, toStem, indexInText, 4);
                 } else if (newToken >= 1000000000) {
                     newToken = newToken / 1000000000;
                     String tokenStr = newToken.toString();
@@ -215,14 +234,14 @@ public class Parse {
                         tokenStr = convertBigDecimalNum(tokenStr);
                     }
                     String stringTerm = tokenStr + "B";
-                    addTerm(stringTerm, doc, toStem, indexInText);
+                    addTerm(stringTerm, doc, toStem, indexInText, 4);
                 } else {
                     if (i + 1 < tokens.size() && !(tokens.get(i + 1).equals("Million") || tokens.get(i + 1).equals("Billion") || tokens.get(i + 1).equals("Trillion") || tokens.get(i + 1).equals("Thousand"))) {
                         if (token.contains(".")) {
                             token = convertSmallDecimalNum(token);
                         }
                         String stringTerm = token;
-                        addTerm(stringTerm, doc, toStem, indexInText);
+                        addTerm(stringTerm, doc, toStem, indexInText, 4);
                     }
                 }
             } else if (isFraction(token)) {
@@ -234,7 +253,7 @@ public class Parse {
                         newToken = Double.parseDouble(tokens.get(i - 1));
                     if (newToken < 1000) {
                         String stringTerm = tokens.get(i - 1) + " " + token;
-                        addTerm(stringTerm, doc, toStem, indexInText);
+                        addTerm(stringTerm, doc, toStem, indexInText, 4);
                     }
                 }
             } else if (token.equals("between") || token.equals("Between")) {
@@ -242,34 +261,33 @@ public class Parse {
                     if (i + 2 < tokens.size() && tokens.get(i + 2).equals("and")) {
                         if (i + 3 < tokens.size() && isNumeric(tokens.get(i + 3))) {
                             String stringTerm = token + " " + tokens.get(i + 1) + " " + tokens.get(i + 2) + " " + tokens.get(i + 3);
-                            addTerm(stringTerm, doc, toStem, indexInText);
+                            addTerm(stringTerm, doc, toStem, indexInText, 4);
                         }
                     }
                 }
             } else if (token.contains("/")) {
                 String[] splitTokens = token.split("/");
                 for (String splitedToken : splitTokens) {
-                    addTerm(splitedToken, doc, toStem, indexInText);
+                    addTerm(splitedToken, doc, toStem, indexInText, 5);
                 }
             }
-            // Evrey thing else
+            // Evrey thing else - 5
             else {
-                token = token.replaceAll(";", "");
-                token = token.replaceAll("\\(", "");
-                token = token.replaceAll("\\)", "");
-                token = token.replaceAll("\"", "");
-                token = token.replaceAll("'s", "");
-
-                if (token.charAt(0) == '"' || token.charAt(0) == '\'' || token.charAt(0) == '.' || token.charAt(0) == '|') {
+                if (token.charAt(0) == '"' || token.charAt(0) == '\'' || token.charAt(0) == '.' || token.charAt(0) == '|' || token.charAt(0) == ',' || token.charAt(0) == '_') {
                     token = token.substring(1);
                 }
-                if (token.charAt(token.length() - 1) == '"' || token.charAt(token.length() - 1) == '\'' || token.charAt(token.length() - 1) == '.' || token.charAt(token.length() - 1) == '|') {
+                if (token.charAt(token.length() - 1) == '"' || token.charAt(token.length() - 1) == '\'' || token.charAt(token.length() - 1) == '.' || token.charAt(token.length() - 1) == '|' || token.charAt(token.length() - 1) == '_') {
                     token = token.substring(0, token.length() - 1);
                 }
+
+                if (token.length() > 1 && token.charAt(0) == '-' && token.charAt(1) == '-') {
+                    token = token.substring(2);
+                }
+
                 if (token.length() <= 1)
                     continue;
-                String stringTerm = token.replaceAll(";", "");
-                addTerm(stringTerm, doc, toStem, indexInText);
+
+                addTerm(token, doc, toStem, indexInText, 5);
             }
             indexInText++;
         }
@@ -317,41 +335,53 @@ public class Parse {
         }
     }
 
-    public void addTerm(String stringTerm, Doc doc, Boolean toStem, int indexInText) {
+    public void addTerm(String stringTerm, Doc doc, Boolean toStem, int indexInText, int rule) {
         Term term;
-        if (stringTerm.chars().allMatch(Character::isLetter)){
-            if (upperLowerDic.containsKey(stringTerm.toLowerCase())){
-                if (stringTerm.length() >= 1 && Character.isLowerCase(stringTerm.charAt(0))) {
-                    upperLowerDic.replace(stringTerm.toLowerCase(), true);
-                }
+        if (rule == 5){
+            if (terms.containsKey(stringTerm.toLowerCase())) {
+                term = terms.get(stringTerm.toLowerCase());
+            } else {
+                term = new Term(stringTerm.toLowerCase(), rule);
             }
-            else {
-                if (stringTerm.length() >= 1 && Character.isLowerCase(stringTerm.charAt(0))) {
-                    upperLowerDic.put(stringTerm.toLowerCase(), true);
-                }
-                else {
-                    upperLowerDic.put(stringTerm.toLowerCase(), false);
-                }
-            }
-        }
-        if (terms.containsKey(stringTerm.toLowerCase())) {
-            term = terms.get(stringTerm.toLowerCase());
-        } else {
-            term = new Term(stringTerm.toLowerCase());
-        }
 
+        }
+        else {
+            if (terms.containsKey(stringTerm)) {
+                term = terms.get(stringTerm);
+            } else {
+                term = new Term(stringTerm, rule);
+            }
+        }
         if (doc == null) {
             if (toStem) {
-                term = stemmer.stem(term);
+                term.setTerm(stemmer.stem(term.getTerm()));
             }
             terms.put(term.getTerm(), term);
         } else {
+            if (upperLowerDic.containsKey(stringTerm.toLowerCase())) {
+                char firstLetter;
+                int i=0;
+                while (i < stringTerm.length() && !Character.isLetter(stringTerm.charAt(i))){
+                    i++;
+                }
+                firstLetter = stringTerm.charAt(i);
+                if (stringTerm.length() >= 1 && Character.isLowerCase(firstLetter)) {
+                    upperLowerDic.replace(stringTerm.toLowerCase(), true);
+                }
+            } else {
+                if (stringTerm.length() >= 1 && Character.isLowerCase(stringTerm.charAt(0))) {
+                    upperLowerDic.put(stringTerm.toLowerCase(), true);
+                } else {
+                    upperLowerDic.put(stringTerm.toLowerCase(), false);
+                }
+            }
+
             int isInTitle = 0;
             if (doc.getTitle().contains(term.getTerm().toUpperCase()) || doc.getTitle().contains(term.getTerm().toLowerCase())) {
                 isInTitle = 1;
             }
             if (toStem) {
-                term = stemmer.stem(term);
+                term.setTerm(stemmer.stem(term.getTerm()));
             }
             if (terms.containsKey(term.getTerm()) && terms.get(term.getTerm()).getDocuments().containsKey(doc.getDocNumber())) {
                 terms.get(term.getTerm()).setExistingDoc(doc.getDocNumber(), indexInText);
