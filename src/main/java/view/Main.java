@@ -1,29 +1,35 @@
 package view;
 
+import controller.Controller;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.layout.Pane;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import model.*;
 import org.json.*;
+
+import java.awt.*;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.*;
+import java.util.List;
 
 public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/view/sample.fxml"));
-        primaryStage.setTitle("Hello World");
-        primaryStage.setScene(new Scene(root, 300, 275));
+        Parent root = FXMLLoader.load(getClass().getResource("/GUI.fxml"));
+        primaryStage.setTitle("Search Engine");
+        primaryStage.setScene(new Scene(root, 800, 550));
         primaryStage.show();
     }
 
     public static List<String> updateCityDetails(String cityName) {
-        List<String> details = new ArrayList<>();
+        List<String> details = new ArrayList<String>();
         try {
             URL url = new URL("https://restcountries.eu/rest/v2/capital/" + cityName.toLowerCase());
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -88,7 +94,7 @@ public class Main extends Application {
         long durationMS = 0;
         long start;
         start = System.currentTimeMillis();
-        Set<String> stopWords = new HashSet<>();
+        Set<String> stopWords = new HashSet<String>();
         try {
             BufferedReader br = new BufferedReader(new FileReader("C:/Users/yifat/corpus/stop_words.txt"));
             String line;
@@ -102,8 +108,8 @@ public class Main extends Application {
 
         File folder = new File("C:/Users/yifat/corpus/");
         File[] files = folder.listFiles();
-        Map<String, Boolean> upperLowerDic = new HashMap<>();
-        Map<String, List<String>> cityMap = new HashMap<>();
+        Map<String, Boolean> upperLowerDic = new HashMap<String, Boolean>();
+        Map<String, List<String>> cityMap = new HashMap<String, List<String>>();
         Parse parse = new Parse(stopWords, upperLowerDic);
         Boolean toStem = false;
         int fileCounter = 1;
@@ -114,14 +120,15 @@ public class Main extends Application {
         double indexSize = files.length / doubleChunkSize;
         String indexSizeString = String.valueOf(indexSize);
         String[] splitedDobule = indexSizeString.split("\\.");
-        List<Thread> indexerThredsList = new ArrayList<>();
-        Map<String, Doc> docsData = new HashMap<>();
+        List<Thread> indexerThredsList = new ArrayList<Thread>();
+        Map<String, Doc> docsData = new HashMap<String, Doc>();
         boolean isRest = false;
         boolean lastIndexer = false;
+        Set<String> languages = new HashSet<>();
         if (Integer.valueOf(splitedDobule[1]) > 0) {
             isRest = true;
         }
-
+/**
         for (File file : files) {
             if (file.isDirectory()) {
                 ReadFile readFile = new ReadFile(file.getAbsolutePath() + "\\" + file.getName());
@@ -201,23 +208,30 @@ public class Main extends Application {
         }
         //System.out.println("________________________________________");
         //System.out.println(parse.getTerms());
-
+**/
         try {
-            PrintWriter pw = new PrintWriter("C:/Users/yifat/postingDir/mapDic");
+            PrintWriter pw = new PrintWriter("C:/Users/yifat/postingDir/mapLanguages");
             for (File file : files) {
                 if (file.isDirectory()) {
                     ReadFile readFile = new ReadFile(file.getAbsolutePath() + "\\" + file.getName());
                     readFile.fillDocumentSet();
                     for (Doc doc : readFile.getDocumentSet()) {
-                        if (!doc.getCity().equals(""))
-                            pw.println(doc.getCity()+";"+doc.getDocNumber()+";"+doc.getFile_path());
+                        if (!doc.getLanguage().equals(""))
+                            languages.add(doc.getLanguage());
                     }
                 }
             }
+            Iterator<String> it = languages.iterator();
+            while (it.hasNext()){
+                String element = it.next();
+                pw.println(element);
+            }
+            pw.flush();
+            pw.close();
         }
         catch (Exception e){
             e.printStackTrace();
-        }**/
+        }
 
         durationMS += System.currentTimeMillis() - start;
         System.out.println(durationMS);

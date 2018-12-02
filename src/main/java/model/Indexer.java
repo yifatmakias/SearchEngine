@@ -17,13 +17,12 @@ public class Indexer implements Runnable {
         this.termsMap = termsMap;
     }
 
-    @Override
     public void run() {
         createPosting();
     }
 
     public void createPosting(){
-        List<String> termsByOrder = new ArrayList<>();
+        List<String> termsByOrder = new ArrayList<String>();
         termsByOrder.addAll(termsMap.keySet());
         Collections.sort(termsByOrder);
         File postingFile = new File(this.postingPath+"file"+String.valueOf(fileNum));

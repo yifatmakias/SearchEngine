@@ -361,7 +361,7 @@ public class Parse {
             if (upperLowerDic.containsKey(stringTerm.toLowerCase())) {
                 char firstLetter;
                 int i=0;
-                while (i < stringTerm.length() && !Character.isLetter(stringTerm.charAt(i))){
+                while (i < stringTerm.length()-1 && !Character.isLetter(stringTerm.charAt(i))){
                     i++;
                 }
                 firstLetter = stringTerm.charAt(i);

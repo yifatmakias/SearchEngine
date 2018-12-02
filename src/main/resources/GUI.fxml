@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="415.0" prefWidth="639.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.GUI">
+   <top>
+      <Label text="Search Engine" BorderPane.alignment="CENTER">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Label>
+   </top>
+   <center>
+      <GridPane alignment="CENTER" BorderPane.alignment="CENTER">
+        <columnConstraints>
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="207.33332316080728" minWidth="10.0" prefWidth="194.6666463216146" />
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="287.00004069010413" minWidth="10.0" prefWidth="227.33331298828122" />
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="218.33329264322913" minWidth="10.0" prefWidth="170.66668701171875" />
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="95.3333740234375" minWidth="10.0" prefWidth="47.66666666666663" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints maxHeight="116.00001668930054" minHeight="0.0" prefHeight="102.00001668930054" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="244.0" minHeight="10.0" prefHeight="59.00001271565755" vgrow="SOMETIMES" />
+          <RowConstraints maxHeight="244.0" minHeight="0.0" prefHeight="85.6666539510091" vgrow="SOMETIMES" />
+          <RowConstraints maxHeight="319.0" minHeight="10.0" prefHeight="136.00000890096027" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="319.0" minHeight="10.0" prefHeight="136.00000890096027" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <Label alignment="CENTER" text="Path for corpus and stop words:" />
+            <TextField fx:id="pathForCorpusAndStopWords" GridPane.columnIndex="1" />
+            <Button fx:id="browse1" mnemonicParsing="false" text="Browse" GridPane.columnIndex="2" onAction="#browse1"/>
+            <Label text="Path for dictionary and posting files:" GridPane.rowIndex="2" />
+            <TextField fx:id="pathForDictionaryAndPosting" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <Button fx:id="browse2" mnemonicParsing="false" text="Browse" GridPane.columnIndex="2" GridPane.rowIndex="2" onAction="#browse2"/>
+            <CheckBox fx:id="stemming" mnemonicParsing="false" text="Do Stemming" GridPane.rowIndex="3" />
+            <Label text="Choose documents language from the list:" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+            <ComboBox prefWidth="150.0" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+            <Button fx:id="start" mnemonicParsing="false" text="Start" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+            <Button fx:id="reset" mnemonicParsing="false" text="Reset" GridPane.columnSpan="2" GridPane.rowIndex="4" />
+            <Button fx:id="showDic" mnemonicParsing="false" text="Show dictionary" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+            <Button fx:id="loadDic" mnemonicParsing="false" text="Load dictionary to memory" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+            <Label id="pathLabel" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+         </children>
+      </GridPane>
+   </center>
+</BorderPane>

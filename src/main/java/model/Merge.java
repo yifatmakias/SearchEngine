@@ -37,7 +37,6 @@ public class Merge {
             }
 
             Queue<String> linesToSort = new PriorityQueue<>(new Comparator<String>() {
-                @Override
                 public int compare(String o1, String o2) {
                     String [] splitline1 = o1.split("\\*");
                     String [] splitline2 = o2.split("\\*");

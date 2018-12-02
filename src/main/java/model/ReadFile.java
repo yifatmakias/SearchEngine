@@ -35,6 +35,8 @@ public class ReadFile {
                 doc.setDocLength(doc.getText().length());
                 String city = element.getElementsByAttributeValue("P","104").text().split(" ")[0].toUpperCase();
                 doc.setCity(city);
+                String language = element.getElementsByAttributeValue("P","105").text();
+                doc.setLanguage(language);
                 documentSet.add(doc);
             }
         }

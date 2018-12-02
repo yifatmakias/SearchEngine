@@ -15,6 +15,7 @@ public class Doc {
     private int max_tf;
     private int uniqueWordCount;
     private String city;
+    private String language;
 
 
     public String getCity() {
@@ -55,6 +56,14 @@ public class Doc {
 
     public void setDocLength(int docLength) {
         this.docLength = docLength;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
     }
 
     public int getDocLength() {
