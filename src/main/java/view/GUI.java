@@ -9,14 +9,10 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.fxml.FXML;
-import javax.swing.*;
 import static org.apache.commons.lang3.StringUtils.*;
-
-import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -121,10 +117,6 @@ public class GUI {
         }
     }
 
-    public CheckBox getStemming() {
-        return stemming;
-
-    }
 
     public void showDic(){
         initControllerForExistingFiles();
@@ -135,7 +127,6 @@ public class GUI {
             textArea.setPrefWidth(580);
             textArea.setPrefHeight(380);
             Pane pane = new Pane(textArea);
-            //VBox vbox = new VBox(textArea);
             pane.setPrefSize(600, 400);
             Stage stage = new Stage();
             stage.setWidth(600);
@@ -144,7 +135,7 @@ public class GUI {
             stage.show();
         }
         else {
-            showErrorAlert("Please press start before trying to show the dictionary.");
+            showErrorAlert("Please press start before trying to load dictionaries, or provide a path for an existing one");
         }
     }
 
@@ -155,7 +146,7 @@ public class GUI {
             showInformationAlert("Loading dictionaries successfully.");
         }
         else {
-            showErrorAlert("Please press start before trying to load dictionaries.");
+            showErrorAlert("Please press start before trying to load dictionaries, or provide a path for an existing one");
         }
     }
 
@@ -166,7 +157,7 @@ public class GUI {
             showInformationAlert("Reset system successfully.");
         }
         else {
-            showErrorAlert("Please press start before trying to reset.");
+            showErrorAlert("Please press start before trying to load dictionaries, or provide a path for an existing one");
         }
     }
 

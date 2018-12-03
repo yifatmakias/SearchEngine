@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * this vlass represents a term.
+ */
 public class Term {
     private String term;
     private int df;
@@ -26,6 +29,9 @@ public class Term {
         return documents;
     }
 
+    /**
+     * adding a new document and its details to the details of the set.
+     */
     public void addNewDocument(String docNumber,int docLength , int inTitle, int position) {
         List<Integer> termData = new ArrayList<>();
         termData.add(1);
@@ -37,6 +43,9 @@ public class Term {
         documents.put(docNumber, termData);
     }
 
+    /**
+     * set the details of an existing doc of the term.
+     */
     public void setExistingDoc(String docNumber, int position){
         List<Integer> termData = documents.get(docNumber);
         termData.set(0,termData.get(0)+1);

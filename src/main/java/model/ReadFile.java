@@ -10,6 +10,9 @@ import java.nio.file.Files;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * read file class. gets a directory path and creates a set od documents by all the docs in the directory.
+ */
 public class ReadFile {
 
     private Set<Doc> documentSet;
@@ -20,6 +23,9 @@ public class ReadFile {
         documentSet = new HashSet<>();
     }
 
+    /**
+     * fill in document set by parsing its tags.
+     */
     public void fillDocumentSet(){
         try {
             File f = new File(this.path);

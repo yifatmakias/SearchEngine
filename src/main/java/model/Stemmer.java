@@ -3,7 +3,9 @@ package model;
 
 import opennlp.tools.stemmer.PorterStemmer;
 
-
+/**
+ * uses java porters stemmer to stem a given string.
+ */
 public class Stemmer {
     PorterStemmer portersStemmer;
 

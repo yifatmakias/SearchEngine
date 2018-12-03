@@ -7,6 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * this class loads the dictionaries from the disk to the memory.
+ */
 public class UploadDictionary {
 
     private String citiesDictionaryPath;
@@ -29,6 +32,9 @@ public class UploadDictionary {
         return dictionary;
     }
 
+    /**
+     * upload cities dictionary from disk to memory.
+     */
     public void uploadCitiesDictionary(){
         try {
             BufferedReader br = new BufferedReader(new FileReader(this.citiesDictionaryPath));
@@ -50,6 +56,9 @@ public class UploadDictionary {
         }
     }
 
+    /**
+     * upload inverted index dictionary from disk to memory.
+     */
     public void uploadDictionary(){
         try {
             BufferedReader br = new BufferedReader(new FileReader(this.dictionaryPath));

@@ -8,6 +8,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.*;
 
+/**
+ * a controller class for connecting between view and model.
+ */
 public class Controller implements Runnable{
 
     private List<Long> result;
@@ -16,6 +19,7 @@ public class Controller implements Runnable{
     private String dicPath;
     private boolean toStem;
     private UploadDictionary uploadDictionary;
+    private Map<String, Doc> docsData;
 
     public Controller(String dicPath, boolean toStem){
         this.dicPath = dicPath;
@@ -34,6 +38,7 @@ public class Controller implements Runnable{
         this.stopWordsPath = stopWordsPath;
         this.dicPath = dicPath;
         this.toStem = toStem;
+        this.docsData = new HashMap<>();
         if (toStem){
             this.uploadDictionary = new UploadDictionary(dicPath+"citiesDictionaryFile", dicPath+"stemmedDictionaryFile");
         }
@@ -47,21 +52,28 @@ public class Controller implements Runnable{
         start();
     }
 
-    public UploadDictionary getUploadDictionary() {
-        return uploadDictionary;
-    }
 
+    /**
+     * upload dictionary from given file path.
+     */
     public void uploadDictionaries(){
         uploadDictionary.uploadCitiesDictionary();
         uploadDictionary.uploadDictionary();
     }
 
+    /**
+     *
+     * @return the result after running start method.
+     */
     public List<Long> getResult() {
         return result;
     }
 
-    public  List<String> updateCityDetails(String cityName) {
-        List<String> details = new ArrayList<String>();
+    /**
+     * gets a city name and returns its details from the api.
+     */
+    private  List<String> updateCityDetails(String cityName) {
+        List<String> details = new ArrayList<>();
         try {
             URL url = new URL("https://restcountries.eu/rest/v2/capital/" + cityName.toLowerCase());
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -69,9 +81,9 @@ public class Controller implements Runnable{
             InputStreamReader inputStreamReader = new InputStreamReader(connection.getInputStream());
             BufferedReader br = new BufferedReader(inputStreamReader);
             String jsonString = "";
-            String line = "";
+            String line;
             while ((line = br.readLine()) != null) {
-                jsonString += line;
+                jsonString = jsonString + line;
             }
             br.close();
             JSONArray jsonArray = new JSONArray(jsonString);
@@ -103,15 +115,16 @@ public class Controller implements Runnable{
                     details.add((String)obj.get("geobytescurrencycode"));
                 }
                 catch (Exception e1){
-                    //e1.printStackTrace();
                 }
             }
-            //e.printStackTrace();
         }
         return details;
     }
 
-    public String convertPopulotianNum(String popNum){
+    /**
+     * gets population string ang parse according to parse rules.
+     */
+    private String convertPopulotianNum(String popNum){
         Parse parse = new Parse();
         Term term = null;
         parse.parse(null, popNum, false);
@@ -122,12 +135,14 @@ public class Controller implements Runnable{
         return term.getTerm();
     }
 
-
-    public void start() {
+    /**
+     * starts indexing process - parse, indexer, merge and separate.
+     */
+    private void start() {
         long durationMS = 0;
         long start;
         start = System.currentTimeMillis();
-        Set<String> stopWords = new HashSet<String>();
+        Set<String> stopWords = new HashSet<>();
         try {
             BufferedReader br = new BufferedReader(new FileReader(stopWordsPath));
             String line;
@@ -141,8 +156,8 @@ public class Controller implements Runnable{
 
         File folder = new File(corpusPath);
         File[] files = folder.listFiles();
-        Map<String, Boolean> upperLowerDic = new HashMap<String, Boolean>();
-        Map<String, List<String>> cityMap = new HashMap<String, List<String>>();
+        Map<String, Boolean> upperLowerDic = new HashMap<>();
+        Map<String, List<String>> cityMap = new HashMap<>();
         Parse parse = new Parse(stopWords, upperLowerDic);
         int fileCounter = 1;
         int fileCounterIndex = 0;
@@ -152,11 +167,9 @@ public class Controller implements Runnable{
         double indexSize = files.length / doubleChunkSize;
         String indexSizeString = String.valueOf(indexSize);
         String[] splitedDobule = indexSizeString.split("\\.");
-        List<Thread> indexerThredsList = new ArrayList<Thread>();
-        Map<String, Doc> docsData = new HashMap<String, Doc>();
+        List<Thread> indexerThredsList = new ArrayList<>();
         boolean isRest = false;
         boolean lastIndexer = false;
-        Set<String> languages = new HashSet<>();
         if (Integer.valueOf(splitedDobule[1]) > 0) {
             isRest = true;
         }
@@ -182,7 +195,7 @@ public class Controller implements Runnable{
                 if (fileCounter == intChunkSize || lastIndexer && fileCounter == files.length % intChunkSize) {
                     fileCounterIndex++;
                     parse.removeStopWords();
-                    Indexer indexer = new Indexer(dicPath, toStem, fileCounterIndex, parse.getTerms());
+                    Indexer indexer = new Indexer(dicPath, fileCounterIndex, parse.getTerms());
                     Thread thread = new Thread(indexer);
                     thread.start();
                     indexerThredsList.add(thread);
@@ -193,7 +206,6 @@ public class Controller implements Runnable{
             }
         }
 
-        //System.out.println(docNum);
         for (Thread t : indexerThredsList) {
             try {
                 t.join();
@@ -213,8 +225,14 @@ public class Controller implements Runnable{
 
     }
 
+    /**
+     * reset system - by deleting files and cleaning memory.
+     */
     public void reset(){
+        this.docsData = null;
+        this.result = null;
         this.uploadDictionary.resetDictionaries();
+        this.uploadDictionary = null;
         File folder = new File(this.dicPath);
         File [] files = folder.listFiles();
         for (File file: files) {
@@ -222,6 +240,9 @@ public class Controller implements Runnable{
         }
     }
 
+    /**
+     * shows dictionary.
+     */
     public String showDic(){
         File file;
         StringBuilder filecontent = new StringBuilder();

@@ -18,6 +18,9 @@ public class Merge {
         this.cityMap = cityMap;
     }
 
+    /**
+     * merge all temp posting files from a given directory.
+     */
     public void merge(){
         try {
             File folder = new File(postingPath);
@@ -124,8 +127,13 @@ public class Merge {
         }
     }
 
+    /**
+     * helping fuction, mersegs term lines.
+     * @param termsToMerge - list of terms.
+     * @return - a string of the merged term line.
+     */
     private String mergeLines(List<String> termsToMerge){
-        String mergedLine = "";
+        String mergedLine;
         String [] splitLine = termsToMerge.get(0).split("\\*");
         String [] dicData = splitLine[0].split(";");
         String termName = dicData[0];
@@ -157,6 +165,10 @@ public class Merge {
         return mergedLine;
     }
 
+    /**
+     * separate the final posting file for 2 files - one for dictionary and the other for posting.
+     * @return - the final term counter.
+     */
     public long separatePosting(){
         long termsCounter = 0;
         try {
@@ -207,6 +219,10 @@ public class Merge {
         return termsCounter;
     }
 
+    /**
+     * separate the final cities posting file for 2 files - one for cities dictionary and the other for cities posting.
+     * @return - the final term counter.
+     */
     public void separateCitiesPosting(){
         try {
             BufferedReader br = new BufferedReader(new FileReader(this.postingPath+"mergedPostingCities"));

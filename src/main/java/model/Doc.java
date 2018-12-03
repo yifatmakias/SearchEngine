@@ -1,10 +1,5 @@
 package model;
 
-import java.lang.reflect.Array;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
-
 public class Doc {
     private String file_path;
     private String  docNumber;
