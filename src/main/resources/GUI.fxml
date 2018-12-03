@@ -11,7 +11,9 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="415.0" prefWidth="639.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.GUI">
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="415.0" prefWidth="639.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.GUI">
    <top>
       <Label text="Search Engine" BorderPane.alignment="CENTER">
          <font>
@@ -43,11 +45,98 @@
             <Button fx:id="browse2" mnemonicParsing="false" text="Browse" GridPane.columnIndex="2" GridPane.rowIndex="2" onAction="#browse2"/>
             <CheckBox fx:id="stemming" mnemonicParsing="false" text="Do Stemming" GridPane.rowIndex="3" />
             <Label text="Choose documents language from the list:" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-            <ComboBox prefWidth="150.0" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-            <Button fx:id="start" mnemonicParsing="false" text="Start" GridPane.columnIndex="3" GridPane.rowIndex="3" />
-            <Button fx:id="reset" mnemonicParsing="false" text="Reset" GridPane.columnSpan="2" GridPane.rowIndex="4" />
-            <Button fx:id="showDic" mnemonicParsing="false" text="Show dictionary" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-            <Button fx:id="loadDic" mnemonicParsing="false" text="Load dictionary to memory" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+            <ComboBox fx:id="languages" onAction="#comboAction" prefWidth="150.0" GridPane.columnIndex="2" GridPane.rowIndex="3">
+                <items>
+                    <FXCollections fx:factory="observableArrayList">
+                        <String fx:value="Enlgish" />
+                        <String fx:value="Hebrew" />
+                        <String fx:value="Cambodia" />
+                        <String fx:value="Russian" />
+                        <String fx:value="Zulu" />
+                        <String fx:value="Turkish" />
+                        <String fx:value="Swedish" />
+                        <String fx:value="Ukrainian" />
+                        <String fx:value="Malay" />
+                        <String fx:value="Tigrigna" />
+                        <String fx:value="Chinese" />
+                        <String fx:value="Armenian" />
+                        <String fx:value="Swahili" />
+                        <String fx:value="Urdu" />
+                        <String fx:value="Serbo" />
+                        <String fx:value="Romanian" />
+                        <String fx:value="Tigrignya" />
+                        <String fx:value="Macedonian" />
+                        <String fx:value="Japanese" />
+                        <String fx:value="Estonian" />
+                        <String fx:value="Bengali" />
+                        <String fx:value="Pashto" />
+                        <String fx:value="French" />
+                        <String fx:value="Portuguese" />
+                        <String fx:value="Uzbek" />
+                        <String fx:value="Persian" />
+                        <String fx:value="German" />
+                        <String fx:value="Span" />
+                        <String fx:value="Serbo-Croatian" />
+                        <String fx:value="English Lithuanian" />
+                        <String fx:value="Chinese" />
+                        <String fx:value="Indonesian" />
+                        <String fx:value="Tagalog" />
+                        <String fx:value="Georgian" />
+                        <String fx:value="Lithuanian" />
+                        <String fx:value="Cambodian" />
+                        <String fx:value="Latvian" />
+                        <String fx:value="Spansih" />
+                        <String fx:value="Korean" />
+                        <String fx:value="Tamil" />
+                        <String fx:value="Rusian" />
+                        <String fx:value="Creole" />
+                        <String fx:value="Chinese" />
+                        <String fx:value="Vietnamese" />
+                        <String fx:value="Czech" />
+                        <String fx:value="Lao" />
+                        <String fx:value="Somali" />
+                        <String fx:value="Dutch" />
+                        <String fx:value="Kyrgyz" />
+                        <String fx:value="Slovak" />
+                        <String fx:value="Belarusian" />
+                        <String fx:value="Greek" />
+                        <String fx:value="Amharic" />
+                        <String fx:value="Hungarian" />
+                        <String fx:value="Danish" />
+                        <String fx:value="Bulgarian" />
+                        <String fx:value="Xhosa" />
+                        <String fx:value="Polish" />
+                        <String fx:value="Albanian" />
+                        <String fx:value="Mandarin" />
+                        <String fx:value="Finnish" />
+                        <String fx:value="Slovenian" />
+                        <String fx:value="Afrikaans" />
+                        <String fx:value="Italian" />
+                        <String fx:value="Dari" />
+                        <String fx:value="Burmese" />
+                        <String fx:value="Kazakh" />
+                        <String fx:value="Azeri" />
+                        <String fx:value="Tigrinya" />
+                        <String fx:value="Malagasy" />
+                        <String fx:value="Cantonese" />
+                        <String fx:value="Norwegian" />
+                        <String fx:value="Thai" />
+                        <String fx:value="Hindi" />
+                        <String fx:value="Spanish" />
+                        <String fx:value="Kinyarwand" />
+                        <String fx:value="Arabic" />
+                        <String fx:value="Tajik" />
+                        <String fx:value="Kinyarwanda" />
+                        <String fx:value="Kirundi" />
+                        <String fx:value="Amharic" />
+                        <String fx:value="Slovene" />
+                    </FXCollections>
+                </items>
+            </ComboBox>
+            <Button fx:id="start" mnemonicParsing="false" text="Start" GridPane.columnIndex="3" GridPane.rowIndex="3" onAction="#startClicked"/>
+            <Button fx:id="reset" mnemonicParsing="false" text="Reset" GridPane.columnSpan="2" GridPane.rowIndex="4" onAction="#reset"/>
+            <Button fx:id="showDic" mnemonicParsing="false" text="Show dictionary" GridPane.columnIndex="1" GridPane.rowIndex="4" onAction="#showDic"/>
+            <Button fx:id="loadDic" mnemonicParsing="false" text="Load dictionary to memory" GridPane.columnIndex="2" GridPane.rowIndex="4" onAction="#loadDictionaries"/>
             <Label id="pathLabel" GridPane.columnIndex="1" GridPane.rowIndex="1" />
          </children>
       </GridPane>

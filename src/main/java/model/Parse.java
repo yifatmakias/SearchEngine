@@ -364,15 +364,27 @@ public class Parse {
                 while (i < stringTerm.length()-1 && !Character.isLetter(stringTerm.charAt(i))){
                     i++;
                 }
-                firstLetter = stringTerm.charAt(i);
-                if (stringTerm.length() >= 1 && Character.isLowerCase(firstLetter)) {
-                    upperLowerDic.replace(stringTerm.toLowerCase(), true);
+                if (stringTerm.length() > 0){
+                    firstLetter = stringTerm.charAt(i);
+                    if (stringTerm.length() >= 1 && Character.isLowerCase(firstLetter)) {
+                        upperLowerDic.replace(stringTerm.toLowerCase(), true);
+                    }
                 }
             } else {
-                if (stringTerm.length() >= 1 && Character.isLowerCase(stringTerm.charAt(0))) {
-                    upperLowerDic.put(stringTerm.toLowerCase(), true);
-                } else {
-                    upperLowerDic.put(stringTerm.toLowerCase(), false);
+                char firstLetter;
+                int i=0;
+                while (i < stringTerm.length()-1 && !Character.isLetter(stringTerm.charAt(i))){
+                    i++;
+                }
+                if (stringTerm.length() > 0){
+                    firstLetter = stringTerm.charAt(i);
+                    if (stringTerm.length() >= 1 && Character.isLowerCase(firstLetter)) {
+                        upperLowerDic.replace(stringTerm.toLowerCase(), true);
+                    }
+                    else {
+                        upperLowerDic.put(stringTerm.toLowerCase(), false);
+
+                    }
                 }
             }
 

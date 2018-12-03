@@ -70,4 +70,11 @@ public class UploadDictionary {
             e.printStackTrace();
         }
     }
+
+    public void resetDictionaries(){
+        this.dictionary = null;
+        this.citiesDictionary = null;
+        this.citiesDictionaryPath = null;
+        this.dictionaryPath = null;
+    }
 }

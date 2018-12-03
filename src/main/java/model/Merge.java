@@ -21,7 +21,13 @@ public class Merge {
     public void merge(){
         try {
             File folder = new File(postingPath);
-            File [] filesArr = folder.listFiles();
+            List<File>tempFilesArr = Arrays.asList(folder.listFiles());
+            for (File file: tempFilesArr) {
+                if (!(file.getName().startsWith("file"))){
+                    tempFilesArr.remove(file);
+                }
+            }
+            File [] filesArr = tempFilesArr.toArray(new File [tempFilesArr.size()]);
             BufferedReader [] bufferedReaders = new BufferedReader[filesArr.length];
             String [] lines = new String[filesArr.length];
 
@@ -151,29 +157,38 @@ public class Merge {
         return mergedLine;
     }
 
-    public void separatePosting(){
+    public long separatePosting(){
+        long termsCounter = 0;
         try {
             BufferedReader br = new BufferedReader(new FileReader(this.postingPath+"mergedPosting"));
             PrintWriter dicWriter;
+            PrintWriter dicWriterToShow;
             PrintWriter postWriter;
             if (toStem){
                 dicWriter = new PrintWriter(this.postingPath+"stemmedDictionaryFile");
+                dicWriterToShow = new PrintWriter(this.postingPath+"stemmedDictionaryToShow");
                 postWriter = new PrintWriter(this.postingPath+"stemmedPostingFile");
             }
             else {
                 dicWriter = new PrintWriter(this.postingPath+"dictionaryFile");
+                dicWriterToShow = new PrintWriter(this.postingPath+"dictionaryFileToShow");
                 postWriter = new PrintWriter(this.postingPath+"postingFile");
             }
             String line = br.readLine();
+            termsCounter++;
             long seekNum = 0;
             while (line != null){
                 String [] spliteLine = line.split("\\*");
                 String dicLine = spliteLine[0];
+                String termString = dicLine.split(";")[0];
+                String tfString = dicLine.split(";")[2];
                 String postLine = spliteLine[1];
                 dicLine = dicLine + ";" + String.valueOf(seekNum);
                 dicWriter.println(dicLine);
+                dicWriterToShow.println(termString+": "+tfString);
                 postWriter.println(postLine);
                 line = br.readLine();
+                termsCounter++;
                 seekNum += postLine.getBytes().length+2;
             }
             dicWriter.flush();
@@ -187,6 +202,7 @@ public class Merge {
         catch (IOException e){
             e.printStackTrace();
         }
+        return termsCounter;
     }
 
     public void separateCitiesPosting(){
