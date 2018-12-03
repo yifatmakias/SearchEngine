@@ -4,12 +4,19 @@ import controller.Controller;
 import javafx.event.ActionEvent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.fxml.FXML;
 import javax.swing.*;
 import static org.apache.commons.lang3.StringUtils.*;
+
+import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -123,11 +130,18 @@ public class GUI {
         initControllerForExistingFiles();
         if (controller != null){
             String fileContent = controller.showDic();
-            //String fileContent = "yifat\nmoran\nbla\nsunny\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
-            JTextArea textArea = new JTextArea();
-            textArea.append(fileContent);
-            JScrollPane scrollPane = new JScrollPane(textArea);
-            JOptionPane.showMessageDialog(null, scrollPane);
+            TextArea textArea = new TextArea();
+            textArea.setText(fileContent);
+            textArea.setPrefWidth(580);
+            textArea.setPrefHeight(380);
+            Pane pane = new Pane(textArea);
+            //VBox vbox = new VBox(textArea);
+            pane.setPrefSize(600, 400);
+            Stage stage = new Stage();
+            stage.setWidth(600);
+            stage.setHeight(400);
+            stage.setScene(new Scene(pane, 600, 400));
+            stage.show();
         }
         else {
             showErrorAlert("Please press start before trying to show the dictionary.");
@@ -158,33 +172,35 @@ public class GUI {
 
     public void initControllerForExistingFiles(){
         String dicPath = this.pathForDictionaryAndPosting.getText();
-        if (dicPath.contains("\\") && dicPath.charAt(dicPath.length()-1) != '\\'){
-            dicPath = dicPath+"\\";
-        }
-        if (dicPath.contains("/") && dicPath.charAt(dicPath.length()-1) != '/'){
-            dicPath = dicPath+"/";
-        }
-        File folder = new File(dicPath);
-        File [] files = folder.listFiles();
-        Set<String> fileNames = new HashSet<>();
-        List<String> filesList = new ArrayList<>();
-        if (stemming.isSelected()){
-            filesList.add("stemmedDictionaryFile");
-            filesList.add("stemmedDictionaryToShow");
-            filesList.add("stemmedPostingFile");
-        }
-        else {
-            filesList.add("dictionaryFile");
-            filesList.add("dictionaryFileToShow");
-            filesList.add("postingFile");
-        }
-        filesList.add("citiesDictionaryFile");
-        filesList.add("citiesPostingFile");
-        for (File file: files) {
-            fileNames.add(file.getName());
-        }
-        if (fileNames.containsAll(filesList)){
-            controller = new Controller(dicPath, stemming.isSelected());
+        if (!dicPath.equals("")){
+            if (dicPath.contains("\\") && dicPath.charAt(dicPath.length()-1) != '\\'){
+                dicPath = dicPath+"\\";
+            }
+            if (dicPath.contains("/") && dicPath.charAt(dicPath.length()-1) != '/'){
+                dicPath = dicPath+"/";
+            }
+            File folder = new File(dicPath);
+            File [] files = folder.listFiles();
+            Set<String> fileNames = new HashSet<>();
+            List<String> filesList = new ArrayList<>();
+            if (stemming.isSelected()){
+                filesList.add("stemmedDictionaryFile");
+                filesList.add("stemmedDictionaryToShow");
+                filesList.add("stemmedPostingFile");
+            }
+            else {
+                filesList.add("dictionaryFile");
+                filesList.add("dictionaryFileToShow");
+                filesList.add("postingFile");
+            }
+            filesList.add("citiesDictionaryFile");
+            filesList.add("citiesPostingFile");
+            for (File file: files) {
+                fileNames.add(file.getName());
+            }
+            if (fileNames.containsAll(filesList)){
+                controller = new Controller(dicPath, stemming.isSelected());
+            }
         }
     }
 

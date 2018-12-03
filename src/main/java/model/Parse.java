@@ -337,6 +337,11 @@ public class Parse {
 
     public void addTerm(String stringTerm, Doc doc, Boolean toStem, int indexInText, int rule) {
         Term term;
+        // check if toStemm is true, and change stringTerm accordingly.
+        if (toStem){
+            stringTerm = stemmer.stem(stringTerm);
+        }
+        // if term came from rule 5  - change it to lower case.
         if (rule == 5){
             if (terms.containsKey(stringTerm.toLowerCase())) {
                 term = terms.get(stringTerm.toLowerCase());
@@ -345,20 +350,22 @@ public class Parse {
             }
 
         }
-        else {
+        else { // if term came from rules 1-4 dont do lower case.
             if (terms.containsKey(stringTerm)) {
                 term = terms.get(stringTerm);
             } else {
                 term = new Term(stringTerm, rule);
             }
         }
+        // only for query
         if (doc == null) {
             if (toStem) {
                 term.setTerm(stemmer.stem(term.getTerm()));
             }
             terms.put(term.getTerm(), term);
         } else {
-            if (upperLowerDic.containsKey(stringTerm.toLowerCase())) {
+            // update upperLowerDic
+            if (upperLowerDic.containsKey(term.getTerm())) {
                 char firstLetter;
                 int i=0;
                 while (i < stringTerm.length()-1 && !Character.isLetter(stringTerm.charAt(i))){
@@ -367,7 +374,7 @@ public class Parse {
                 if (stringTerm.length() > 0){
                     firstLetter = stringTerm.charAt(i);
                     if (stringTerm.length() >= 1 && Character.isLowerCase(firstLetter)) {
-                        upperLowerDic.replace(stringTerm.toLowerCase(), true);
+                        upperLowerDic.replace(term.getTerm(), true);
                     }
                 }
             } else {
@@ -379,7 +386,7 @@ public class Parse {
                 if (stringTerm.length() > 0){
                     firstLetter = stringTerm.charAt(i);
                     if (stringTerm.length() >= 1 && Character.isLowerCase(firstLetter)) {
-                        upperLowerDic.replace(stringTerm.toLowerCase(), true);
+                        upperLowerDic.replace(term.getTerm(), true);
                     }
                     else {
                         upperLowerDic.put(stringTerm.toLowerCase(), false);
@@ -387,14 +394,12 @@ public class Parse {
                     }
                 }
             }
-
+            // update details of the term.
             int isInTitle = 0;
             if (doc.getTitle().contains(term.getTerm().toUpperCase()) || doc.getTitle().contains(term.getTerm().toLowerCase())) {
                 isInTitle = 1;
             }
-            if (toStem) {
-                term.setTerm(stemmer.stem(term.getTerm()));
-            }
+
             if (terms.containsKey(term.getTerm()) && terms.get(term.getTerm()).getDocuments().containsKey(doc.getDocNumber())) {
                 terms.get(term.getTerm()).setExistingDoc(doc.getDocNumber(), indexInText);
                 int currentTf = terms.get(term.getTerm()).getDocuments().get(doc.getDocNumber()).get(0);

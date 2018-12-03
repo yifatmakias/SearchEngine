@@ -224,7 +224,7 @@ public class Controller implements Runnable{
 
     public String showDic(){
         File file;
-        String filecontent = "";
+        StringBuilder filecontent = new StringBuilder();
         if (toStem){
             file = new File(this.dicPath+"stemmedDictionaryToShow");
         }
@@ -235,7 +235,7 @@ public class Controller implements Runnable{
             BufferedReader br = new BufferedReader(new FileReader(file));
             String line = br.readLine();
             while (line != null){
-                filecontent = filecontent + line +'\n';
+                filecontent.append(line+'\n');
                 line = br.readLine();
             }
             br.close();
@@ -243,6 +243,6 @@ public class Controller implements Runnable{
         catch (Exception e){
             e.printStackTrace();
         }
-        return filecontent;
+        return filecontent.toString();
     }
 }

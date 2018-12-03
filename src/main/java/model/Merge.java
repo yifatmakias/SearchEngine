@@ -193,6 +193,8 @@ public class Merge {
             }
             dicWriter.flush();
             postWriter.flush();
+            dicWriterToShow.flush();
+            dicWriterToShow.close();
             dicWriter.close();
             postWriter.close();
             br.close();
