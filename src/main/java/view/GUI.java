@@ -48,6 +48,10 @@ public class GUI {
     private Controller controller;
 
 
+    public Controller getController() {
+        return controller;
+    }
+
     public void browse1(){
         DirectoryChooser chooser = new DirectoryChooser();
         File file = chooser.showDialog(new Stage());

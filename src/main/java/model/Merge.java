@@ -24,13 +24,14 @@ public class Merge {
     public void merge(){
         try {
             File folder = new File(postingPath);
-            List<File>tempFilesArr = Arrays.asList(folder.listFiles());
-            for (File file: tempFilesArr) {
-                if (!(file.getName().startsWith("file"))){
-                    tempFilesArr.remove(file);
+            List<File>tempFilesArr1 = Arrays.asList(folder.listFiles());
+            List<File> tempFilesArr2 = new ArrayList<>();
+            for (File file: tempFilesArr1) {
+                if (file.getName().startsWith("file")){
+                    tempFilesArr2.add(file);
                 }
             }
-            File [] filesArr = tempFilesArr.toArray(new File [tempFilesArr.size()]);
+            File [] filesArr = tempFilesArr2.toArray(new File [tempFilesArr2.size()]);
             BufferedReader [] bufferedReaders = new BufferedReader[filesArr.length];
             String [] lines = new String[filesArr.length];
 

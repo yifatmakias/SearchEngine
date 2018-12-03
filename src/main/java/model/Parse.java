@@ -447,7 +447,7 @@ public class Parse {
      * @param str
      * @return true if the given string is a number.
      */
-    private boolean isNumeric(String str) {
+    public boolean isNumeric(String str) {
         return str.matches("-?\\d+(,\\d+)*(\\.\\d+)?");  //match a number with optional '-' and decimal.
     }
 
