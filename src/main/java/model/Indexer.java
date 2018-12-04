@@ -37,7 +37,7 @@ public class Indexer implements Runnable {
                 String lineToWrite;
                 String tfInCorpusString = String.valueOf(termsMap.get(term).getTfInCorpus());
                 String dfString = String.valueOf(termsMap.get(term).getDf());
-                lineToWrite = term+";"+tfInCorpusString+";"+dfString+"*";
+                lineToWrite = term + ";" + dfString + ";" + tfInCorpusString+"*";
                 for (Iterator<Map.Entry<String, List<Integer>>> it = termsMap.get(term).getDocuments().entrySet().iterator(); it.hasNext(); ) {
                     Map.Entry<String, List<Integer>> entry = it.next();
                     String docData = entry.getKey()+"$";

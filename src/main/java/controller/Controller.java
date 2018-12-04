@@ -75,7 +75,6 @@ public class Controller implements Runnable{
     private  List<String> updateCityDetails(String cityName) {
         List<String> details = new ArrayList<>();
         try {
-            int capitalCounter = 0;
             URL url = new URL("https://restcountries.eu/rest/v2/capital/" + cityName.toLowerCase());
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
@@ -95,8 +94,8 @@ public class Controller implements Runnable{
             JSONArray currency = obj.getJSONArray("currencies");
             JSONObject currencyObj = (JSONObject) currency.get(0);
             details.add((String)currencyObj.get("code"));
-            capitalCounter++;
-            System.out.println(capitalCounter);
+            //int capitalCounter = 1;
+            //System.out.println(capitalCounter);
         } catch (Exception e) {
             if (e instanceof  FileNotFoundException){
                 try {
@@ -195,7 +194,7 @@ public class Controller implements Runnable{
                 if (fileCounterIndex == Integer.valueOf(splitedDobule[0]) && isRest) {
                     lastIndexer = true;
                 }
-                if (fileCounter == intChunkSize || lastIndexer && fileCounter == files.length - 1 % intChunkSize) {
+                if (fileCounter == intChunkSize || lastIndexer && fileCounter == (files.length - 1) % intChunkSize) {
                     fileCounterIndex++;
                     parse.removeStopWords();
                     Indexer indexer = new Indexer(dicPath, fileCounterIndex, parse.getTerms());

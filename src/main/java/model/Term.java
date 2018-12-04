@@ -14,7 +14,7 @@ public class Term {
     private int tfInCorpus;
     private int ruleNumber;
     // map of the documents of the term.
-    // data in list - tf - in doc, docLength, isInTitle, positions in doc
+    // data in list - tf - in doc, isInTitle, positions in doc
     private HashMap<String, List<Integer>> documents;
 
     public Term(String term, int ruleNumber) {

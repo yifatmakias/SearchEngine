@@ -45,6 +45,7 @@ public class Parse {
         for (int i = 0; i < tokens.size(); i++) {
             String token = tokens.get(i);
 
+
             // remove special characters
             token = replaceChars(token, "*", "");
             token = replaceChars(token, ";", "");
@@ -52,12 +53,13 @@ public class Parse {
             token = replaceChars(token, ")", "");
             token = replaceChars(token, "\"", "");
             token = replaceChars(token, "|", "");
-            token = replaceChars(token, "'", "");
+            token = replaceChars(token, "\'", "");
             token = replaceChars(token, "]", "");
             token = replaceChars(token, "[", "");
             token = replaceChars(token, "&", "");
             token = replaceChars(token, "<", "");
             token = replaceChars(token, ">", "");
+            token = token.replaceAll("--", "-");
 
 
             token = token.replaceAll("[^\\p{Print}\\t\\n]", "");
@@ -271,12 +273,10 @@ public class Parse {
                 for (String splitedToken : splitTokens) {
                     addTerm(splitedToken, doc, toStem, indexInText, 5);
                 }
-            } else if (token.contains("--")) {
-                token.replaceAll("--", "-");
             }
             // Evrey thing else - 5
             else {
-                if (token.charAt(0) == '"' || token.charAt(0) == '\'' || token.charAt(0) == '.' || token.charAt(0) == '|' || token.charAt(0) == ',' || token.charAt(0) == '_') {
+                if (token.charAt(0) == '"' || token.charAt(0) == '\'' || token.charAt(0) == '.' || token.charAt(0) == '|' || token.charAt(0) == ',' || token.charAt(0) == '_' || token.charAt(0) == '+') {
                     token = token.substring(1);
                 }
                 if (token.charAt(token.length() - 1) == '"' || token.charAt(token.length() - 1) == '\'' || token.charAt(token.length() - 1) == '.' || token.charAt(token.length() - 1) == '|' || token.charAt(token.length() - 1) == '_') {
@@ -455,7 +455,7 @@ public class Parse {
      * @param str
      * @return true if the string is a fraction number.
      */
-    private boolean isFraction(String str) {
+    public boolean isFraction(String str) {
         return str.matches("\\d+/\\d+|\\.\\d+");
     }
 
