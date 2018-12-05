@@ -2,9 +2,6 @@
   <artifact type="jar" name="SearchEngine:jar">
     <output-path>$PROJECT_DIR$/out/artifacts/SearchEngine_jar</output-path>
     <root id="archive" name="SearchEngine.jar">
-      <element id="directory" name="META-INF">
-        <element id="file-copy" path="$USER_HOME$/Desktop/META-INF/MANIFEST.MF" />
-      </element>
       <element id="module-output" name="SearchEngine" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/apache/commons/commons-lang3/3.0/commons-lang3-3.0.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/json/json/20180813/json-20180813.jar" path-in-jar="/" />

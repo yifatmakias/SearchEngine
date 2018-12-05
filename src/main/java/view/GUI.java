@@ -19,7 +19,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-
+/**
+ * Gui class - connected to the fxml file.
+ */
 public class GUI {
 
     @FXML
@@ -52,6 +54,9 @@ public class GUI {
         return controller;
     }
 
+    /**
+     * first browse function, opens the browse directory option.
+     */
     public void browse1(){
         DirectoryChooser chooser = new DirectoryChooser();
         File file = chooser.showDialog(new Stage());
@@ -63,6 +68,9 @@ public class GUI {
         }
     }
 
+    /**
+     * second browse function, opens the browse directory option.
+     */
     public void browse2(){
         DirectoryChooser chooser = new DirectoryChooser();
         File file = chooser.showDialog(new Stage());
@@ -74,13 +82,20 @@ public class GUI {
         }
     }
 
+    /**
+     * on action for the combo box, writes the chosen string in the combobox.
+     * @param event
+     */
     public void comboAction(ActionEvent event) {
         String field = (String)languages.getValue();
         if(field == null)
             return;
     }
 
-
+    /**
+     * on action for the start button.
+     * show the results from the start button to an information alert.
+     */
     public void startClicked(){
         String corpusAndStopWordsPath = this.pathForCorpusAndStopWords.getText();
         String dicPath = this.pathForDictionaryAndPosting.getText();
@@ -121,7 +136,9 @@ public class GUI {
         }
     }
 
-
+    /**
+     * this function shows the dictionary after starting the system, or loading a valid dictionary path.
+     */
     public void showDic(){
         initControllerForExistingFiles();
         if (controller != null){
@@ -143,6 +160,9 @@ public class GUI {
         }
     }
 
+    /**
+     * this function loads the dictionaries to the memory.
+     */
     public void loadDictionaries(){
         initControllerForExistingFiles();
         if (controller != null){
@@ -154,6 +174,9 @@ public class GUI {
         }
     }
 
+    /**
+     * this function resets the memory and delets the files that were created during indexing operation.
+     */
     public void reset(){
         initControllerForExistingFiles();
         if (controller != null){
@@ -165,6 +188,9 @@ public class GUI {
         }
     }
 
+    /**
+     * this is an helper function, that initiate the controller object if a path was given.
+     */
     public void initControllerForExistingFiles(){
         String dicPath = this.pathForDictionaryAndPosting.getText();
         if (!dicPath.equals("")){
@@ -199,6 +225,9 @@ public class GUI {
         }
     }
 
+    /**
+     * generic information alert.
+     */
     private void showInformationAlert(String stringAlert){
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Information Message");
@@ -206,11 +235,13 @@ public class GUI {
         alert.show();
     }
 
+    /**
+     * generic error alert.
+     */
     private void showErrorAlert(String stringAlert){
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error Message");
         alert.setContentText(stringAlert);
         alert.showAndWait();
     }
-
 }
