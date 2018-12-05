@@ -1,7 +1,10 @@
 package view;
 
 import controller.Controller;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
@@ -13,7 +16,10 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.fxml.FXML;
 import static org.apache.commons.lang3.StringUtils.*;
+
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -142,17 +148,41 @@ public class GUI {
     public void showDic(){
         initControllerForExistingFiles();
         if (controller != null){
-            String fileContent = controller.showDic();
-            TextArea textArea = new TextArea();
-            textArea.setText(fileContent);
-            textArea.setPrefWidth(580);
-            textArea.setPrefHeight(380);
-            Pane pane = new Pane(textArea);
+            File file;
+            StringBuilder filecontent = new StringBuilder();
+            ObservableList<String> observableList = FXCollections.observableArrayList();
+            if (stemming.isSelected()){
+                file = new File(controller.getDicPath()+"stemmedDictionaryToShow");
+            }
+            else {
+                file = new File(controller.getDicPath()+"dictionaryFileToShow");
+            }
+            try {
+                BufferedReader br = new BufferedReader(new FileReader(file));
+                String line = br.readLine();
+                while (line != null){
+                    filecontent.append(line+'\n');
+                    line = br.readLine();
+                    if (line != null)
+                        observableList.add(line);
+                }
+                br.close();
+            }
+            catch (Exception e){
+                e.printStackTrace();
+            }
+
+            ListView<String> list = new ListView<>();
+            list.setItems(observableList);
+            list.setPrefHeight(360);
+            list.setPrefWidth(580);
+            Pane pane = new Pane(list);
             pane.setPrefSize(600, 400);
             Stage stage = new Stage();
             stage.setWidth(600);
             stage.setHeight(400);
             stage.setScene(new Scene(pane, 600, 400));
+            stage.setTitle("Dictionary");
             stage.show();
         }
         else {

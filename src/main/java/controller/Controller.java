@@ -52,6 +52,9 @@ public class Controller implements Runnable{
         start();
     }
 
+    public String getDicPath() {
+        return dicPath;
+    }
 
     /**
      * upload dictionary from given file path.
@@ -240,32 +243,5 @@ public class Controller implements Runnable{
         for (File file: files) {
             file.delete();
         }
-    }
-
-    /**
-     * shows dictionary.
-     */
-    public String showDic(){
-        File file;
-        StringBuilder filecontent = new StringBuilder();
-        if (toStem){
-            file = new File(this.dicPath+"stemmedDictionaryToShow");
-        }
-        else {
-            file = new File(this.dicPath+"dictionaryFileToShow");
-        }
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(file));
-            String line = br.readLine();
-            while (line != null){
-                filecontent.append(line+'\n');
-                line = br.readLine();
-            }
-            br.close();
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
-        return filecontent.toString();
     }
 }
