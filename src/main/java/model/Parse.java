@@ -403,7 +403,7 @@ public class Parse {
                         upperLowerDic.replace(term.getTerm(), true);
                     } else {
                         upperLowerDic.put(stringTerm.toLowerCase(), false);
-
+                        doc.addTermToSet(term.getTerm());
                     }
                 }
             }
@@ -412,7 +412,6 @@ public class Parse {
             if (doc.getTitle().contains(term.getTerm().toUpperCase()) || doc.getTitle().contains(term.getTerm().toLowerCase())) {
                 isInTitle = 1;
             }
-
             if (terms.containsKey(term.getTerm()) && terms.get(term.getTerm()).getDocuments().containsKey(doc.getDocNumber())) {
                 terms.get(term.getTerm()).setExistingDoc(doc.getDocNumber(), indexInText);
                 int currentTf = terms.get(term.getTerm()).getDocuments().get(doc.getDocNumber()).get(0);

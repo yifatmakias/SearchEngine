@@ -1,6 +1,10 @@
 package model;
 
-public class Doc {
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
+
+public class Doc implements Serializable {
     private String file_path;
     private String  docNumber;
     private String date;
@@ -11,7 +15,11 @@ public class Doc {
     private int uniqueWordCount;
     private String city;
     private String language;
+    private Set<String> termsSet;
 
+    public Doc() {
+        this.termsSet = new HashSet<>();
+    }
 
     public String getCity() {
         return city;
@@ -88,6 +96,14 @@ public class Doc {
 
     public String getFile_path() {
         return file_path;
+    }
+
+    public Set<String> getTermsString() {
+        return termsSet;
+    }
+
+    public void addTermToSet(String term) {
+        this.termsSet.add(term);
     }
 
     @Override
