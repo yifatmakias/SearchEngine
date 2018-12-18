@@ -13,7 +13,7 @@ public class Ranker {
     private double avdl; // the average length of the docs in corpus.
     private List<String> postingLines;
 
-    public Ranker(List<Pair<String, Integer>> query, Set<Doc> docsToRank, int docsCount_M, double avdl, List<String> postingLines) {
+    public Ranker(List<Pair<String, Integer>> query, Set<Doc> docsToRank, double docsCount_M, double avdl, List<String> postingLines) {
         this.query = query;
         this.docsToRank = docsToRank;
         this.rankedDocs = new HashMap<>();

@@ -14,14 +14,19 @@ public class Searcher {
     private boolean toStem;
     private String docsMapPath;
     private Map<String, Doc> docsMap;
+    private List<String> chosenCities;
+    private String citiesPostingPath;
+    private Ranker ranker;
 
-    public Searcher(String query, UploadDictionary uploadDictionary, String postingPath, boolean toStem, String docsMapPath) {
+    public Searcher(String query, UploadDictionary uploadDictionary, String postingPath, boolean toStem, String docsMapPath, List<String> chosenCities, String citiesPostingPath) {
         this.query = query;
         this.parse = new Parse();
         this.uploadDictionary = uploadDictionary;
         this.postingPath = postingPath;
         this.toStem = toStem;
         this.docsMapPath = docsMapPath;
+        this.chosenCities = chosenCities;
+        this.citiesPostingPath = citiesPostingPath;
         setDocsMap();
     }
 
@@ -65,6 +70,7 @@ public class Searcher {
         List<Pair<String, Integer>> queryToRanker = new ArrayList<>();
         List<String> postingLinesToRanker = new ArrayList<>();
         Map<String, List<Integer>> dictionary = uploadDictionary.getDictionary();
+        Map<String, List<String>> citiesDictionary = uploadDictionary.getCitiesDictionary();
         for (String queryString: queryList) {
             int df = dictionary.get(queryString).get(0);
             int pointer = dictionary.get(queryString).get(2);
@@ -80,6 +86,40 @@ public class Searcher {
                 e.printStackTrace();
             }
         }
+        Set<String> docsForQuery = getRelevantDocsForQuery(postingLinesToRanker);
+        List<String> postingLinesCities = new ArrayList<>();
+        for(String city: chosenCities) {
+            int cityPointer = Integer.valueOf(citiesDictionary.get(city).get(3));
+            try {
+                RandomAccessFile randomAccessFile = new RandomAccessFile(citiesPostingPath, "r");
+                randomAccessFile.seek(cityPointer);
+                String line = randomAccessFile.readLine();
+                postingLinesCities.add(line);
+            }
+            catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+        Set<String> docsByCities = getRelevantDocsForQuery(postingLinesCities);
+        Set<Doc> relevantDocsForRenker = new HashSet<>();
+        docsForQuery.retainAll(docsByCities);
+        for (String docNumber: docsForQuery) {
+            relevantDocsForRenker.add(docsMap.get(docNumber));
+        }
+        ranker = new Ranker(queryToRanker, relevantDocsForRenker, docsCount_M, avdl, postingLinesToRanker);
+        ranker.rankDocs();
+        this.resultForQuery = ranker.getRankedDocs();
+    }
 
+    public Set<String> getRelevantDocsForQuery(List<String> postingLines) {
+        Set<String> docsForQuery = new HashSet<>();
+        for (String postingLine : postingLines) {
+            String[] splitLine = postingLine.split("\\$");
+            for (int i = 0; i < splitLine.length - 1; i += 2) {
+                String docNumber = splitLine[i];
+                docsForQuery.add(docNumber);
+            }
+        }
+        return docsForQuery;
     }
 }
