@@ -12,36 +12,37 @@ public class Searcher {
     private UploadDictionary uploadDictionary;
     private String postingPath;
     private boolean toStem;
-    private String docsMapPath;
     private Map<String, Doc> docsMap;
     private List<String> chosenCities;
     private String citiesPostingPath;
     private Ranker ranker;
 
-    public Searcher(String query, UploadDictionary uploadDictionary, String postingPath, boolean toStem, String docsMapPath, List<String> chosenCities, String citiesPostingPath) {
+    public Searcher(String query, UploadDictionary uploadDictionary, String postingPath, boolean toStem, List<String> chosenCities, String citiesPostingPath, Map<String, Doc> docsMap) {
         this.query = query;
         this.parse = new Parse();
         this.uploadDictionary = uploadDictionary;
         this.postingPath = postingPath;
         this.toStem = toStem;
-        this.docsMapPath = docsMapPath;
         this.chosenCities = chosenCities;
         this.citiesPostingPath = citiesPostingPath;
-        setDocsMap();
+        this.docsMap = new HashMap<>();
+        this.docsMap = docsMap;
+        //setDocsMap();
     }
 
+    /**
     public void setDocsMap() {
         try {
-            File docsFile = new File(this.docsMapPath);
-            FileInputStream fileInputStream = new FileInputStream(docsFile);
+            FileInputStream fileInputStream = new FileInputStream(this.docsMapPath);
             ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
-            this.docsMap = (Map<String, Doc>) objectInputStream.readObject();
+            this.docsMap = (Map) objectInputStream.readObject();
+            fileInputStream.close();
             objectInputStream.close();
         }
         catch (Exception e){
             e.printStackTrace();
         }
-    }
+    }**/
 
     public Map<String, Double> getResultForQuery() {
         return resultForQuery;
@@ -104,7 +105,7 @@ public class Searcher {
         Set<Doc> relevantDocsForRenker = new HashSet<>();
         docsForQuery.retainAll(docsByCities);
         for (String docNumber: docsForQuery) {
-            relevantDocsForRenker.add(docsMap.get(docNumber));
+            relevantDocsForRenker.add((Doc)docsMap.get(docNumber));
         }
         ranker = new Ranker(queryToRanker, relevantDocsForRenker, docsCount_M, avdl, postingLinesToRanker);
         ranker.rankDocs();

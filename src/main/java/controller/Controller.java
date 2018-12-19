@@ -221,21 +221,12 @@ public class Controller implements Runnable{
         Merge merge = new Merge(dicPath, upperLowerDic, toStem, cityMap);
         merge.merge();
         try {
-            //creating a file for docs map
-            PrintWriter docsPW = new PrintWriter(dicPath+"docsData");
-            File docsFile = new File(dicPath+"docsData");
-            FileOutputStream fileOutputStreamDocs = new FileOutputStream(docsFile);
+            FileOutputStream fileOutputStreamDocs = new FileOutputStream(dicPath+"docsData");
             ObjectOutputStream objectOutputStreamDocs = new ObjectOutputStream(fileOutputStreamDocs);
             objectOutputStreamDocs.writeObject(docsData);
+            objectOutputStreamDocs.flush();
             objectOutputStreamDocs.close();
-
-            //creating a file for cities map
-            PrintWriter citiesPW = new PrintWriter(dicPath+"citiesData");
-            File citiesFile = new File(dicPath+"citiesData");
-            FileOutputStream fileOutputStreamCities = new FileOutputStream(citiesFile);
-            ObjectOutputStream objectOutputStreamCities = new ObjectOutputStream(fileOutputStreamCities);
-            objectOutputStreamCities.writeObject(cityMap);
-            objectOutputStreamCities.close();
+            fileOutputStreamDocs.close();
         }
         catch (Exception e) {
             e.printStackTrace();
