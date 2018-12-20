@@ -12,12 +12,12 @@ public class Searcher {
     private UploadDictionary uploadDictionary;
     private String postingPath;
     private boolean toStem;
-    private Map<String, Doc> docsMap;
+    private Map<String, List<String>> docsMap;
     private List<String> chosenCities;
     private String citiesPostingPath;
     private Ranker ranker;
 
-    public Searcher(String query, UploadDictionary uploadDictionary, String postingPath, boolean toStem, List<String> chosenCities, String citiesPostingPath, Map<String, Doc> docsMap) {
+    public Searcher(String query, UploadDictionary uploadDictionary, String postingPath, boolean toStem, List<String> chosenCities, String citiesPostingPath, Map<String, List<String>> docsMap) {
         this.query = query;
         this.parse = new Parse();
         this.uploadDictionary = uploadDictionary;
@@ -31,18 +31,18 @@ public class Searcher {
     }
 
     /**
-    public void setDocsMap() {
-        try {
-            FileInputStream fileInputStream = new FileInputStream(this.docsMapPath);
-            ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
-            this.docsMap = (Map) objectInputStream.readObject();
-            fileInputStream.close();
-            objectInputStream.close();
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
-    }**/
+     public void setDocsMap() {
+     try {
+     FileInputStream fileInputStream = new FileInputStream(this.docsMapPath);
+     ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+     this.docsMap = (Map) objectInputStream.readObject();
+     fileInputStream.close();
+     objectInputStream.close();
+     }
+     catch (Exception e){
+     e.printStackTrace();
+     }
+     }**/
 
     public Map<String, Double> getResultForQuery() {
         return resultForQuery;
@@ -62,14 +62,17 @@ public class Searcher {
         }
         double docsCount_M = this.docsMap.size();
         long sumDocsLength = 0;
-        for (Iterator<Map.Entry<String, Doc>> it = docsMap.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry<String, Doc> entry = it.next();
-            Doc doc = entry.getValue();
-            sumDocsLength += doc.getDocLength();
+        for (Iterator<Map.Entry<String, List<String>>> it = docsMap.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry<String, List<String>> entry = it.next();
+            List<String> docData= entry.getValue();
+            int docLength = Integer.valueOf(docData.get(0));
+            sumDocsLength += docLength;
         }
         double avdl = sumDocsLength/ docsCount_M;
         List<Pair<String, Integer>> queryToRanker = new ArrayList<>();
         List<String> postingLinesToRanker = new ArrayList<>();
+        uploadDictionary.uploadDictionary();
+        uploadDictionary.uploadCitiesDictionary();
         Map<String, List<Integer>> dictionary = uploadDictionary.getDictionary();
         Map<String, List<String>> citiesDictionary = uploadDictionary.getCitiesDictionary();
         for (String queryString: queryList) {
@@ -102,10 +105,12 @@ public class Searcher {
             }
         }
         Set<String> docsByCities = getRelevantDocsForQuery(postingLinesCities);
-        Set<Doc> relevantDocsForRenker = new HashSet<>();
+        Map<String,Integer> relevantDocsForRenker = new HashMap<>();
         docsForQuery.retainAll(docsByCities);
+
         for (String docNumber: docsForQuery) {
-            relevantDocsForRenker.add((Doc)docsMap.get(docNumber));
+            int docLength= Integer.valueOf(docsMap.get(docNumber).get(1));
+            relevantDocsForRenker.put(docNumber,docLength);
         }
         ranker = new Ranker(queryToRanker, relevantDocsForRenker, docsCount_M, avdl, postingLinesToRanker);
         ranker.rankDocs();

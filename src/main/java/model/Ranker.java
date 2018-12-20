@@ -8,12 +8,12 @@ import java.util.stream.Collectors;
 public class Ranker {
     private Map<String, Double> rankedDocs;
     private List<Pair<String, Integer>> query; // term string after parse and df
-    private Set<Doc> docsToRank;
+    private Map<String,Integer> docsToRank;
     private double docsCount_M;
     private double avdl; // the average length of the docs in corpus.
     private List<String> postingLines;
 
-    public Ranker(List<Pair<String, Integer>> query, Set<Doc> docsToRank, double docsCount_M, double avdl, List<String> postingLines) {
+    public Ranker(List<Pair<String, Integer>> query, Map<String,Integer> docsToRank, double docsCount_M, double avdl, List<String> postingLines) {
         this.query = query;
         this.docsToRank = docsToRank;
         this.rankedDocs = new HashMap<>();
@@ -43,16 +43,19 @@ public class Ranker {
         double positionFactorWeight = 0.2;
         int k = 2;
         double b = 0.75;
-        for (Doc doc : docsToRank) {
+
+        for (Iterator<Map.Entry<String, Integer>> it = docsToRank.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry<String, Integer> entry = it.next();
+            String docNumber= entry.getKey();
             double BM25Factor = 0;
             double inTitleFactor = 0;
             double positionFactor = 0;
-            double docLength = doc.getDocLength(); // |d|
+            double docLength = entry.getValue();; // |d|
             for (int i = 0; i < query.size(); i++) {
                 String termInQuery = query.get(i).getKey();
                 int countTermInQuery = countTermInQuery(termInQuery); // c(w,q)
                 double termDf = query.get(i).getValue();
-                List<Integer> docData = parsedPostingLines.get(i).get(doc.getDocNumber());
+                List<Integer> docData = parsedPostingLines.get(i).get(docNumber);
                 int termTf = docData.get(0);
                 int isInTitle = docData.get(1);
                 int firstPosition = docData.get(2);
@@ -64,7 +67,7 @@ public class Ranker {
                 positionFactor+= (docLength - firstPosition) / docLength;
             }
             double rank = BM25FactorWeight * BM25Factor + inTitleFactorWeight * inTitleFactor + positionFactorWeight * positionFactor;
-            this.rankedDocs.put(doc.getDocNumber(), rank);
+            this.rankedDocs.put(docNumber, rank);
         }
         this.rankedDocs = rankedDocs.entrySet().stream().sorted(Map.Entry.comparingByValue()).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
     }

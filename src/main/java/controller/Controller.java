@@ -178,7 +178,6 @@ public class Controller implements Runnable{
         if (Integer.valueOf(splitedDobule[1]) > 0) {
             isRest = true;
         }
-
         for (File file : files) {
             if (file.isDirectory()) {
                 ReadFile readFile = new ReadFile(file.getAbsolutePath() + "\\" + file.getName());
@@ -210,7 +209,6 @@ public class Controller implements Runnable{
                 fileCounter++;
             }
         }
-
         for (Thread t : indexerThredsList) {
             try {
                 t.join();
@@ -220,15 +218,28 @@ public class Controller implements Runnable{
         }
         Merge merge = new Merge(dicPath, upperLowerDic, toStem, cityMap);
         merge.merge();
+
+        File docsDataFile = new File(dicPath+"docsData");
         try {
-            FileOutputStream fileOutputStreamDocs = new FileOutputStream(dicPath+"docsData");
-            ObjectOutputStream objectOutputStreamDocs = new ObjectOutputStream(fileOutputStreamDocs);
-            objectOutputStreamDocs.writeObject(docsData);
-            objectOutputStreamDocs.flush();
-            objectOutputStreamDocs.close();
-            fileOutputStreamDocs.close();
+            PrintWriter pw = new PrintWriter(docsDataFile);
+            for (Iterator<Map.Entry<String, Doc>> it = docsData.entrySet().iterator(); it.hasNext();) {
+                Map.Entry<String, Doc> entry = it.next();
+                Doc doc = entry.getValue();
+                StringBuilder docLine = new StringBuilder();
+                docLine.append(doc.getDocNumber());
+                docLine.append("$");
+                docLine.append(doc.getDocLength());
+                docLine.append("$");
+                for (String term: doc.getUpperTermsString()) {
+                    docLine.append(term);
+                    docLine.append("$");
+                }
+                pw.println(docLine);
+            }
+            pw.flush();
+            pw.close();
         }
-        catch (Exception e) {
+        catch (Exception e){
             e.printStackTrace();
         }
         long termsCounter = merge.separatePosting();
@@ -238,7 +249,6 @@ public class Controller implements Runnable{
         result.add(docNum);
         result.add(termsCounter);
         result.add(runningTime);
-
     }
 
     /**

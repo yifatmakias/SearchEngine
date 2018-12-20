@@ -15,10 +15,10 @@ public class Doc implements Serializable {
     private int uniqueWordCount;
     private String city;
     private String language;
-    private Set<String> termsSet;
+    private Set<String> upperTermsSet;
 
     public Doc() {
-        this.termsSet = new HashSet<>();
+        this.upperTermsSet = new HashSet<>();
     }
 
     public String getCity() {
@@ -98,12 +98,12 @@ public class Doc implements Serializable {
         return file_path;
     }
 
-    public Set<String> getTermsString() {
-        return termsSet;
+    public Set<String> getUpperTermsString() {
+        return upperTermsSet;
     }
 
     public void addTermToSet(String term) {
-        this.termsSet.add(term);
+        this.upperTermsSet.add(term);
     }
 
     @Override
