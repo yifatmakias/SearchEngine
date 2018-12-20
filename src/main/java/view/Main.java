@@ -72,7 +72,11 @@ public class Main extends Application {
             }
             br.close();
             UploadDictionary uploadDictionary = new UploadDictionary("C:/Users/yifat/postingDir/citiesDictionaryFile", "C:/Users/yifat/postingDir/dictionaryFile");
-            Searcher searcher = new Searcher("British Chunnel impact", uploadDictionary, "C:/Users/yifat/postingDir/postingFile", false,  cities, "C:/Users/yifat/postingDir/citiesPostingFile", docsMap);
+            uploadDictionary.uploadDictionary();
+            uploadDictionary.uploadCitiesDictionary();
+            Map<String, List<Integer>> dictionary = uploadDictionary.getDictionary();
+            Map<String, List<String>> citiesDictionary = uploadDictionary.getCitiesDictionary();
+            Searcher searcher = new Searcher("British Chunnel impact", dictionary, citiesDictionary, "C:/Users/yifat/postingDir/postingFile", false,  cities, "C:/Users/yifat/postingDir/citiesPostingFile", docsMap);
             searcher.queryHandle();
             System.out.println(searcher.getResultForQuery());
         }

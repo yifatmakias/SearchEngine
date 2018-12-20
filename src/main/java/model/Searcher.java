@@ -9,46 +9,34 @@ public class Searcher {
     private String query;
     private Map<String, Double> resultForQuery;
     private Parse parse;
-    private UploadDictionary uploadDictionary;
     private String postingPath;
     private boolean toStem;
     private Map<String, List<String>> docsMap;
     private List<String> chosenCities;
     private String citiesPostingPath;
-    private Ranker ranker;
+    private Map<String, List<Integer>> dictionary;
+    private Map<String, List<String>> citiesDictionary;
 
-    public Searcher(String query, UploadDictionary uploadDictionary, String postingPath, boolean toStem, List<String> chosenCities, String citiesPostingPath, Map<String, List<String>> docsMap) {
+
+    public Searcher(String query, Map<String, List<Integer>> dictionary, Map<String, List<String>> citiesDictionary, String postingPath, boolean toStem, List<String> chosenCities, String citiesPostingPath, Map<String, List<String>> docsMap) {
         this.query = query;
         this.parse = new Parse();
-        this.uploadDictionary = uploadDictionary;
         this.postingPath = postingPath;
         this.toStem = toStem;
         this.chosenCities = chosenCities;
         this.citiesPostingPath = citiesPostingPath;
         this.docsMap = new HashMap<>();
         this.docsMap = docsMap;
-        //setDocsMap();
+        this.dictionary = dictionary;
+        this.citiesDictionary = citiesDictionary;
     }
-
-    /**
-     public void setDocsMap() {
-     try {
-     FileInputStream fileInputStream = new FileInputStream(this.docsMapPath);
-     ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
-     this.docsMap = (Map) objectInputStream.readObject();
-     fileInputStream.close();
-     objectInputStream.close();
-     }
-     catch (Exception e){
-     e.printStackTrace();
-     }
-     }**/
 
     public Map<String, Double> getResultForQuery() {
         return resultForQuery;
     }
 
     public void queryHandle() {
+        Ranker ranker;
         String [] querySplit = query.split(" ");
         List<String> queryList = new ArrayList<>();
         for (int i = 0; i <querySplit.length ; i++) {
@@ -59,6 +47,7 @@ public class Searcher {
                 String queryTerm = entry.getKey();
                 queryList.add(queryTerm);
             }
+            parse = new Parse();
         }
         double docsCount_M = this.docsMap.size();
         long sumDocsLength = 0;
@@ -71,11 +60,8 @@ public class Searcher {
         double avdl = sumDocsLength/ docsCount_M;
         List<Pair<String, Integer>> queryToRanker = new ArrayList<>();
         List<String> postingLinesToRanker = new ArrayList<>();
-        uploadDictionary.uploadDictionary();
-        uploadDictionary.uploadCitiesDictionary();
-        Map<String, List<Integer>> dictionary = uploadDictionary.getDictionary();
-        Map<String, List<String>> citiesDictionary = uploadDictionary.getCitiesDictionary();
-        for (String queryString: queryList) {
+        for (int i=0; i< queryList.size(); i++) {
+            String queryString = queryList.get(i);
             int df = dictionary.get(queryString).get(0);
             int pointer = dictionary.get(queryString).get(2);
             Pair<String, Integer> termAndDf = new Pair<>(queryString, df);
@@ -106,10 +92,11 @@ public class Searcher {
         }
         Set<String> docsByCities = getRelevantDocsForQuery(postingLinesCities);
         Map<String,Integer> relevantDocsForRenker = new HashMap<>();
-        docsForQuery.retainAll(docsByCities);
+        if (docsByCities.size() > 0)
+            docsForQuery.retainAll(docsByCities);
 
         for (String docNumber: docsForQuery) {
-            int docLength= Integer.valueOf(docsMap.get(docNumber).get(1));
+            int docLength= Integer.valueOf(docsMap.get(docNumber).get(0));
             relevantDocsForRenker.put(docNumber,docLength);
         }
         ranker = new Ranker(queryToRanker, relevantDocsForRenker, docsCount_M, avdl, postingLinesToRanker);
@@ -117,7 +104,7 @@ public class Searcher {
         this.resultForQuery = ranker.getRankedDocs();
     }
 
-    public Set<String> getRelevantDocsForQuery(List<String> postingLines) {
+    private Set<String> getRelevantDocsForQuery(List<String> postingLines) {
         Set<String> docsForQuery = new HashSet<>();
         for (String postingLine : postingLines) {
             String[] splitLine = postingLine.split("\\$");

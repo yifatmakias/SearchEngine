@@ -3,7 +3,10 @@ package model;
 import javafx.util.Pair;
 
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
+
+import static java.util.Collections.reverseOrder;
 
 public class Ranker {
     private Map<String, Double> rankedDocs;
@@ -44,8 +47,8 @@ public class Ranker {
         int k = 2;
         double b = 0.75;
 
-        for (Iterator<Map.Entry<String, Integer>> it = docsToRank.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry<String, Integer> entry = it.next();
+        for (Iterator<Entry<String, Integer>> it = docsToRank.entrySet().iterator(); it.hasNext(); ) {
+            Entry<String, Integer> entry = it.next();
             String docNumber= entry.getKey();
             double BM25Factor = 0;
             double inTitleFactor = 0;
@@ -56,6 +59,8 @@ public class Ranker {
                 int countTermInQuery = countTermInQuery(termInQuery); // c(w,q)
                 double termDf = query.get(i).getValue();
                 List<Integer> docData = parsedPostingLines.get(i).get(docNumber);
+                if (docData == null)
+                    continue;
                 int termTf = docData.get(0);
                 int isInTitle = docData.get(1);
                 int firstPosition = docData.get(2);
@@ -69,10 +74,11 @@ public class Ranker {
             double rank = BM25FactorWeight * BM25Factor + inTitleFactorWeight * inTitleFactor + positionFactorWeight * positionFactor;
             this.rankedDocs.put(docNumber, rank);
         }
-        this.rankedDocs = rankedDocs.entrySet().stream().sorted(Map.Entry.comparingByValue()).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+        this.rankedDocs = rankedDocs.entrySet().stream().sorted(reverseOrder(Entry.comparingByValue())).collect(Collectors.toMap(Entry::getKey, Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+        this.rankedDocs = getfirstFiftyDocs(rankedDocs);
     }
 
-    public List<Map<String, List<Integer>>> parsePostingLines(){
+    private List<Map<String, List<Integer>>> parsePostingLines(){
         List<Map<String, List<Integer>>> parsedPostingLines = new ArrayList<>();
         for (String postingLine: postingLines){
             String [] splitLine = postingLine.split("\\$");
@@ -89,5 +95,18 @@ public class Ranker {
             parsedPostingLines.add(docsMap);
         }
         return parsedPostingLines;
+    }
+
+    private Map<String, Double> getfirstFiftyDocs(Map<String, Double> sortedDocs) {
+        Map<String, Double> firstFifty = new HashMap<>();
+        int maxDocs = 50;
+        int countDocs = 0;
+        for (Map.Entry<String, Double> entry: sortedDocs.entrySet()){
+            if (countDocs > maxDocs)
+                break;
+            firstFifty.put(entry.getKey(), entry.getValue());
+            countDocs++;
+        }
+        return firstFifty;
     }
 }
