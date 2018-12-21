@@ -7,6 +7,9 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.util.Collections.reverseOrder;
 
 /**
  * a controller class for connecting between view and model.
@@ -20,6 +23,7 @@ public class Controller implements Runnable{
     private boolean toStem;
     private UploadDictionary uploadDictionary;
     private Map<String, Doc> docsData;
+    private Map<String, List<String>> docsDataNoStart;
 
     public Controller(String dicPath, boolean toStem){
         this.dicPath = dicPath;
@@ -30,6 +34,7 @@ public class Controller implements Runnable{
         else {
             this.uploadDictionary = new UploadDictionary(dicPath+"citiesDictionaryFile", dicPath+"dictionaryFile");
         }
+        this.docsDataNoStart = new HashMap<>();
     }
 
     public Controller(String corpusPath, String stopWordsPath, String dicPath, boolean toStem) {
@@ -45,6 +50,7 @@ public class Controller implements Runnable{
         else {
             this.uploadDictionary = new UploadDictionary(dicPath+"citiesDictionaryFile", dicPath+"dictionaryFile");
         }
+        this.docsDataNoStart = new HashMap<>();
     }
 
     @Override
@@ -230,6 +236,11 @@ public class Controller implements Runnable{
                 docLine.append("$");
                 docLine.append(doc.getDocLength());
                 docLine.append("$");
+                if (doc.getCity().equals("") || doc.getCity() == null)
+                    docLine.append("noCity");
+                else
+                    docLine.append(doc.getCity());
+                docLine.append("$");
                 for (String term: doc.getUpperTermsString()) {
                     docLine.append(term);
                     docLine.append("$");
@@ -264,5 +275,89 @@ public class Controller implements Runnable{
         for (File file: files) {
             file.delete();
         }
+    }
+
+    public Map<String, Integer> getMaxEntities(String docNumber) {
+        Map<String, Integer> unsortedResult = new LinkedHashMap<>();
+        Map<String, Integer> sortedResult;
+
+        List<String> docData = this.docsDataNoStart.get(docNumber);
+        for (int i = 2; i < docData.size() ; i++) {
+            String entity = docData.get(i);
+            Map<String, List<Integer>> dictionary = uploadDictionary.getDictionary();
+            if (dictionary.containsKey(entity.toUpperCase())) {
+                int pointer = dictionary.get(entity.toUpperCase()).get(2);
+                try {
+                    RandomAccessFile randomAccessFile = new RandomAccessFile(dicPath+"postingFile", "r");
+                    randomAccessFile.seek(pointer);
+                    String line = randomAccessFile.readLine();
+                    String [] splitedLine = line.split("\\$");
+                    for (int j = 0; j < splitedLine.length - 1; j += 2) {
+                        if (docNumber.equals(splitedLine[j])) {
+                            String [] splitedData = splitedLine[j+1].split(",");
+                            int tf = Integer.valueOf(splitedData[0]);
+                            unsortedResult.put(entity.toUpperCase(), tf);
+                        }
+                    }
+                }
+                catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+        }
+        sortedResult = unsortedResult.entrySet().stream().sorted(reverseOrder(Map.Entry.comparingByValue())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+        //unsortedResult.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).forEachOrdered(x -> sortedResult.put(x.getKey(), x.getValue()));
+        //sortedResult = getfirstFiveEntities(sortedResult);
+        return sortedResult;
+    }
+
+    public Map<String, Double> runQuery(List<String> cities, String query, boolean toStem, boolean doSemantic) {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(this.dicPath + "docsData"));
+            String line = br.readLine();
+            while (line != null) {
+                String[] splitedLine = line.split("\\$");
+                String docNumber = splitedLine[0];
+                List<String> docList = new ArrayList<>();
+                for (int i = 1; i < splitedLine.length; i++) {
+                    docList.add(splitedLine[i]);
+                }
+                docsDataNoStart.put(docNumber, docList);
+                line = br.readLine();
+            }
+            br.close();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+        Map<String, List<Integer>> dictionary = uploadDictionary.getDictionary();
+        Map<String, List<String>> citiesDictionary = uploadDictionary.getCitiesDictionary();
+        Searcher searcher = new Searcher(query, dictionary, citiesDictionary, this.dicPath+"postingFile", toStem,  cities, dicPath+"citiesPostingFile", docsDataNoStart, doSemantic);
+        searcher.queryHandle();
+        System.out.println(searcher.getResultForQuery());
+        /**
+        PrintWriter pw = new PrintWriter("C:/Users/yifat/Desktop/results.txt");
+
+        for (Map.Entry<String, Double> entry: searcher.getResultForQuery().entrySet()){
+            //pw.println("352" + " 0 " + entry.getKey() + " 1 " + entry.getValue() + " mt");
+            System.out.println("352" + " 0 " + entry.getKey() + " 1 " + entry.getValue() + " mt");
+        }
+        //System.out.println(searcher.getResultForQuery().size());**/
+        return searcher.getResultForQuery();
+    }
+
+    private Map<String, Integer> getfirstFiveEntities(Map<String, Integer> sortedEntities) {
+        Map<String, Integer> firstFive = new LinkedHashMap<>();
+        int maxEntities = 1;
+        int countEntities = 1;
+
+        for (Map.Entry<String, Integer> entry: sortedEntities.entrySet()){
+            if (countEntities > maxEntities)
+                break;
+            firstFive.put(entry.getKey(), entry.getValue());
+            countEntities++;
+
+        }
+        return firstFive;
     }
 }

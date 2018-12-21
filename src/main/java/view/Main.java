@@ -1,5 +1,6 @@
 package view;
 
+import controller.Controller;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
@@ -10,12 +11,15 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import model.Searcher;
-import model.UploadDictionary;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.File;
+import java.nio.file.Files;
 import java.util.*;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 
 public class Main extends Application {
@@ -29,7 +33,26 @@ public class Main extends Application {
     }
 
     public static void main(String[] args) {
-        runQuery();
+        //parseQueryFile();
+        Controller controller = new Controller("C:/Users/yifat/postingDir/",false);
+        controller.uploadDictionaries();
+        List<String> cities = new ArrayList<>();
+        long durationMS = 0;
+        long start;
+        start = System.currentTimeMillis();
+        controller.runQuery(cities, "British Chunnel impact", false, false);
+        durationMS += System.currentTimeMillis() - start;
+        Long runningTime = durationMS / 1000;
+        System.out.println(runningTime);
+        long durationMS1 = 0;
+        long start1;
+        start1 = System.currentTimeMillis();
+        controller.runQuery(cities, "British Chunnel impact", false, true);
+        durationMS1 += System.currentTimeMillis() - start1;
+        Long runningTime1 = durationMS1 / 1000;
+        System.out.println(runningTime1);
+
+        //System.out.println(controller.getMaxEntities("FT922-1149"));
         launch(args);
     }
 
@@ -54,31 +77,15 @@ public class Main extends Application {
         });
     }
 
-    public static void runQuery() {
-        List<String> cities = new ArrayList<>();
-        Map<String, List<String>> docsMap = new HashMap<>();
+    public static void parseQueryFile() {
         try {
-            BufferedReader br = new BufferedReader(new FileReader("C:/Users/yifat/postingDir/docsData"));
-            String line = br.readLine();
-            while (line != null){
-                String [] splitedLine = line.split("\\$");
-                String docNumber = splitedLine[0];
-                List<String> docList = new ArrayList<>();
-                for (int i = 1; i < splitedLine.length  ; i++) {
-                    docList.add(splitedLine[i]);
-                }
-                docsMap.put(docNumber, docList);
-                line = br.readLine();
+            File f = new File("C:/Users/yifat/Desktop/quries.txt");
+            Document document = Jsoup.parse(new String(Files.readAllBytes(f.toPath())));
+            Elements elements = document.getElementsByTag("top");
+            for (Element element: elements) {
+                System.out.println(element.getElementsByTag("num").text());
+                System.out.println(element.getElementsByTag("title").text());
             }
-            br.close();
-            UploadDictionary uploadDictionary = new UploadDictionary("C:/Users/yifat/postingDir/citiesDictionaryFile", "C:/Users/yifat/postingDir/dictionaryFile");
-            uploadDictionary.uploadDictionary();
-            uploadDictionary.uploadCitiesDictionary();
-            Map<String, List<Integer>> dictionary = uploadDictionary.getDictionary();
-            Map<String, List<String>> citiesDictionary = uploadDictionary.getCitiesDictionary();
-            Searcher searcher = new Searcher("British Chunnel impact", dictionary, citiesDictionary, "C:/Users/yifat/postingDir/postingFile", false,  cities, "C:/Users/yifat/postingDir/citiesPostingFile", docsMap);
-            searcher.queryHandle();
-            System.out.println(searcher.getResultForQuery());
         }
         catch (Exception e){
             e.printStackTrace();
