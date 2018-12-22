@@ -33,18 +33,18 @@ public class Main extends Application {
     }
 
     public static void main(String[] args) {
-
+        /**
         Controller controller = new Controller("C:/Users/yifat/corpus/stop_words.txt","C:/Users/yifat/postingDir/",false);
         controller.uploadDictionaries();
         List<String> cities = new ArrayList<>();
-        /**
+
         long durationMS = 0;
         long start;
         start = System.currentTimeMillis();
         controller.runQuery(cities, "British Chunnel impact", false, false, "What impact has the Chunnel had on the British economy and/or the life style of the British?");
         durationMS += System.currentTimeMillis() - start;
         Long runningTime = durationMS / 1000;
-        System.out.println(runningTime);**/
+        System.out.println(runningTime);
 
         long durationMS1 = 0;
         long start1;

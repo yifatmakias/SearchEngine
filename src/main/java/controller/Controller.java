@@ -62,6 +62,10 @@ public class Controller implements Runnable{
         start();
     }
 
+    public UploadDictionary getUploadDictionary() {
+        return uploadDictionary;
+    }
+
     public void fillStopWordsSet() {
         try {
             BufferedReader br = new BufferedReader(new FileReader(stopWordsPath));
@@ -278,6 +282,8 @@ public class Controller implements Runnable{
      */
     public void reset(){
         this.docsData = null;
+        this.stopWords = null;
+        this.docsDataNoStart = null;
         this.result = null;
         this.uploadDictionary.resetDictionaries();
         this.uploadDictionary = null;
@@ -299,7 +305,14 @@ public class Controller implements Runnable{
             if (dictionary.containsKey(entity.toUpperCase())) {
                 int pointer = dictionary.get(entity.toUpperCase()).get(2);
                 try {
-                    RandomAccessFile randomAccessFile = new RandomAccessFile(dicPath+"postingFile", "r");
+                    String postingPath;
+                    if (toStem) {
+                        postingPath = dicPath+"stemmedPostingFile";
+                    }
+                    else {
+                        postingPath = dicPath+"postingFile";
+                    }
+                    RandomAccessFile randomAccessFile = new RandomAccessFile(postingPath, "r");
                     randomAccessFile.seek(pointer);
                     String line = randomAccessFile.readLine();
                     String [] splitedLine = line.split("\\$");
@@ -356,7 +369,8 @@ public class Controller implements Runnable{
 
         Searcher searcher = new Searcher(query, dictionary, citiesDictionary, postingPath, toStem,  cities, dicPath+"citiesPostingFile", docsDataNoStart, doSemantic, stopWords, description);
         searcher.queryHandle();
-        //System.out.println(searcher.getResultForQuery());
+        /**
+        System.out.println(searcher.getResultForQuery());
 
         try {
             PrintWriter pw = new PrintWriter("C:/Users/yifat/Desktop/results50.txt");
@@ -368,11 +382,11 @@ public class Controller implements Runnable{
         catch (Exception e) {
             e.printStackTrace();
         }
-        //System.out.println(searcher.getResultForQuery().size());**/
+        System.out.println(searcher.getResultForQuery().size());**/
         return searcher.getResultForQuery();
     }
 
-    private Map<String, Integer> getfirstFiveEntities(Map<String, Integer> sortedEntities) {
+    public Map<String, Integer> getfirstFiveEntities(Map<String, Integer> sortedEntities) {
         Map<String, Integer> firstFive = new LinkedHashMap<>();
         int maxEntities = 1;
         int countEntities = 1;
