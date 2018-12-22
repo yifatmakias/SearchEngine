@@ -24,9 +24,11 @@ public class Controller implements Runnable{
     private UploadDictionary uploadDictionary;
     private Map<String, Doc> docsData;
     private Map<String, List<String>> docsDataNoStart;
+    private Set<String> stopWords;
 
-    public Controller(String dicPath, boolean toStem){
+    public Controller(String stopWordsPath, String dicPath, boolean toStem){
         this.dicPath = dicPath;
+        this.stopWordsPath = stopWordsPath;
         this.toStem = toStem;
         if (toStem){
             this.uploadDictionary = new UploadDictionary(dicPath+"citiesDictionaryFile", dicPath+"stemmedDictionaryFile");
@@ -35,6 +37,7 @@ public class Controller implements Runnable{
             this.uploadDictionary = new UploadDictionary(dicPath+"citiesDictionaryFile", dicPath+"dictionaryFile");
         }
         this.docsDataNoStart = new HashMap<>();
+        this.stopWords = new HashSet<>();
     }
 
     public Controller(String corpusPath, String stopWordsPath, String dicPath, boolean toStem) {
@@ -56,6 +59,19 @@ public class Controller implements Runnable{
     @Override
     public void run() {
         start();
+    }
+
+    public void fillStopWordsSet() {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(stopWordsPath));
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (!(line.equals("b") || line.equals("c") || line.equals("d") || line.equals("e") || line.equals("f") || line.equals("g") || line.equals("h") || line.equals("i") || line.equals("j") || line.equals("k") || line.equals("l") || line.equals("m") || line.equals("n") || line.equals("o") || line.equals("p") || line.equals("q") || line.equals("r") || line.equals("s") || line.equals("t") || line.equals("u") || line.equals("v") || line.equals("w") || line.equals("x") || line.equals("y") || line.equals("z")))
+                    stopWords.add(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public String getDicPath() {
@@ -153,18 +169,7 @@ public class Controller implements Runnable{
         long durationMS = 0;
         long start;
         start = System.currentTimeMillis();
-        Set<String> stopWords = new HashSet<>();
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(stopWordsPath));
-            String line;
-            while ((line = br.readLine()) != null) {
-                if (!(line.equals("b") || line.equals("c") || line.equals("d") || line.equals("e") || line.equals("f") || line.equals("g") || line.equals("h") || line.equals("i") || line.equals("j") || line.equals("k") || line.equals("l") || line.equals("m") || line.equals("n") || line.equals("o") || line.equals("p") || line.equals("q") || line.equals("r") || line.equals("s") || line.equals("t") || line.equals("u") || line.equals("v") || line.equals("w") || line.equals("x") || line.equals("y") || line.equals("z")))
-                    stopWords.add(line);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+        fillStopWordsSet();
         File folder = new File(corpusPath);
         File[] files = folder.listFiles();
         Map<String, Boolean> upperLowerDic = new HashMap<>();
@@ -312,6 +317,7 @@ public class Controller implements Runnable{
     }
 
     public Map<String, Double> runQuery(List<String> cities, String query, boolean toStem, boolean doSemantic) {
+        fillStopWordsSet();
         try {
             BufferedReader br = new BufferedReader(new FileReader(this.dicPath + "docsData"));
             String line = br.readLine();
@@ -332,15 +338,18 @@ public class Controller implements Runnable{
         }
         Map<String, List<Integer>> dictionary = uploadDictionary.getDictionary();
         Map<String, List<String>> citiesDictionary = uploadDictionary.getCitiesDictionary();
-        Searcher searcher = new Searcher(query, dictionary, citiesDictionary, this.dicPath+"postingFile", toStem,  cities, dicPath+"citiesPostingFile", docsDataNoStart, doSemantic);
+        Searcher searcher = new Searcher(query, dictionary, citiesDictionary, this.dicPath+"postingFile", toStem,  cities, dicPath+"citiesPostingFile", docsDataNoStart, doSemantic, stopWords);
         searcher.queryHandle();
-        System.out.println(searcher.getResultForQuery());
-        /**
-        PrintWriter pw = new PrintWriter("C:/Users/yifat/Desktop/results.txt");
-
-        for (Map.Entry<String, Double> entry: searcher.getResultForQuery().entrySet()){
-            //pw.println("352" + " 0 " + entry.getKey() + " 1 " + entry.getValue() + " mt");
-            System.out.println("352" + " 0 " + entry.getKey() + " 1 " + entry.getValue() + " mt");
+        //System.out.println(searcher.getResultForQuery());
+        try {
+            PrintWriter pw = new PrintWriter("C:/Users/yifat/Desktop/results50.txt");
+            for (Map.Entry<String, Double> entry: searcher.getResultForQuery().entrySet()){
+                //pw.println("352" + " 0 " + entry.getKey() + " 1 " + entry.getValue() + " mt");
+                System.out.println("352" + " 0 " + entry.getKey() + " 1 " + entry.getValue() + " mt");
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
         }
         //System.out.println(searcher.getResultForQuery().size());**/
         return searcher.getResultForQuery();

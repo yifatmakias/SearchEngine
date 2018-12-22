@@ -21,11 +21,12 @@ public class Searcher {
     private Map<String, List<Integer>> dictionary;
     private Map<String, List<String>> citiesDictionary;
     private boolean doSemantic;
+    private Set<String> stopWords;
 
 
-    public Searcher(String query, Map<String, List<Integer>> dictionary, Map<String, List<String>> citiesDictionary, String postingPath, boolean toStem, List<String> chosenCities, String citiesPostingPath, Map<String, List<String>> docsMap, boolean doSemantic) {
+    public Searcher(String query, Map<String, List<Integer>> dictionary, Map<String, List<String>> citiesDictionary, String postingPath, boolean toStem, List<String> chosenCities, String citiesPostingPath, Map<String, List<String>> docsMap, boolean doSemantic, Set<String> stopWords) {
         this.query = query;
-        this.parse = new Parse();
+        this.parse = new Parse(stopWords);
         this.postingPath = postingPath;
         this.toStem = toStem;
         this.chosenCities = chosenCities;
@@ -35,6 +36,7 @@ public class Searcher {
         this.dictionary = dictionary;
         this.citiesDictionary = citiesDictionary;
         this.doSemantic = doSemantic;
+        this.stopWords = stopWords;
     }
 
     public Map<String, Double> getResultForQuery() {
@@ -47,6 +49,7 @@ public class Searcher {
         List<String> queryList = new ArrayList<>();
         for (int i = 0; i <querySplit.length ; i++) {
             parse.parse(null, querySplit[i], this.toStem);
+            parse.removeStopWords();
             Map<String, Term> queryTerms = parse.getTerms();
             for (Iterator<Map.Entry<String, Term>> it = queryTerms.entrySet().iterator(); it.hasNext(); ) {
                 Map.Entry<String, Term> entry = it.next();
@@ -59,7 +62,7 @@ public class Searcher {
                     }
                 }
             }
-            parse = new Parse();
+            parse = new Parse(stopWords);
         }
         Map<String, List<Pair<String,String>>> querySynonyms = null;
         if (doSemantic) {

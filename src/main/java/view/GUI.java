@@ -221,36 +221,46 @@ public class GUI {
     /**
      * this is an helper function, that initiate the controller object if a path was given.
      */
-    public void initControllerForExistingFiles(){
-        String dicPath = this.pathForDictionaryAndPosting.getText();
-        if (!dicPath.equals("")){
-            if (dicPath.contains("\\") && dicPath.charAt(dicPath.length()-1) != '\\'){
-                dicPath = dicPath+"\\";
+    public void initControllerForExistingFiles() {
+        String corpusAndStopWordsPath = this.pathForCorpusAndStopWords.getText();
+        File file1 = new File(corpusAndStopWordsPath);
+        String stopWordsPath;
+        if (file1.isDirectory()) {
+            if (corpusAndStopWordsPath.contains("\\")) {
+                corpusAndStopWordsPath = replaceChars(corpusAndStopWordsPath, "\\", "/");
+                stopWordsPath = corpusAndStopWordsPath + "/stop_words.txt";
+            } else {
+                stopWordsPath = corpusAndStopWordsPath + "/stop_words.txt";
             }
-            if (dicPath.contains("/") && dicPath.charAt(dicPath.length()-1) != '/'){
-                dicPath = dicPath+"/";
-            }
-            File folder = new File(dicPath);
-            File [] files = folder.listFiles();
-            Set<String> fileNames = new HashSet<>();
-            List<String> filesList = new ArrayList<>();
-            if (stemming.isSelected()){
-                filesList.add("stemmedDictionaryFile");
-                filesList.add("stemmedDictionaryToShow");
-                filesList.add("stemmedPostingFile");
-            }
-            else {
-                filesList.add("dictionaryFile");
-                filesList.add("dictionaryFileToShow");
-                filesList.add("postingFile");
-            }
-            filesList.add("citiesDictionaryFile");
-            filesList.add("citiesPostingFile");
-            for (File file: files) {
-                fileNames.add(file.getName());
-            }
-            if (fileNames.containsAll(filesList)){
-                controller = new Controller(dicPath, stemming.isSelected());
+            String dicPath = this.pathForDictionaryAndPosting.getText();
+            if (!dicPath.equals("")) {
+                if (dicPath.contains("\\") && dicPath.charAt(dicPath.length() - 1) != '\\') {
+                    dicPath = dicPath + "\\";
+                }
+                if (dicPath.contains("/") && dicPath.charAt(dicPath.length() - 1) != '/') {
+                    dicPath = dicPath + "/";
+                }
+                File folder = new File(dicPath);
+                File[] files = folder.listFiles();
+                Set<String> fileNames = new HashSet<>();
+                List<String> filesList = new ArrayList<>();
+                if (stemming.isSelected()) {
+                    filesList.add("stemmedDictionaryFile");
+                    filesList.add("stemmedDictionaryToShow");
+                    filesList.add("stemmedPostingFile");
+                } else {
+                    filesList.add("dictionaryFile");
+                    filesList.add("dictionaryFileToShow");
+                    filesList.add("postingFile");
+                }
+                filesList.add("citiesDictionaryFile");
+                filesList.add("citiesPostingFile");
+                for (File file : files) {
+                    fileNames.add(file.getName());
+                }
+                if (fileNames.containsAll(filesList)) {
+                    controller = new Controller(stopWordsPath, dicPath, stemming.isSelected());
+                }
             }
         }
     }

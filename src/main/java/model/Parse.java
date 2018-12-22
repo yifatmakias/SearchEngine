@@ -27,6 +27,13 @@ public class Parse {
         fillMonthDic();
     }
 
+    public Parse(Set<String> stopWords) {
+        this.terms = new HashMap<>();
+        this.stemmer = new Stemmer();
+        this.stopWords = stopWords;
+        fillMonthDic();
+    }
+
     /**
      * parse a given string or a text of the given doc.
      * @param doc         - document (optional)

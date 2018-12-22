@@ -34,9 +34,11 @@ public class Main extends Application {
 
     public static void main(String[] args) {
         //parseQueryFile();
-        Controller controller = new Controller("C:/Users/yifat/postingDir/",false);
+        Controller controller = new Controller("C:/Users/yifat/corpus/stop_words.txt","C:/Users/yifat/postingDir/",false);
         controller.uploadDictionaries();
         List<String> cities = new ArrayList<>();
+        //cities.add("paris");
+
         long durationMS = 0;
         long start;
         start = System.currentTimeMillis();
@@ -44,13 +46,14 @@ public class Main extends Application {
         durationMS += System.currentTimeMillis() - start;
         Long runningTime = durationMS / 1000;
         System.out.println(runningTime);
+        /**
         long durationMS1 = 0;
         long start1;
         start1 = System.currentTimeMillis();
         controller.runQuery(cities, "British Chunnel impact", false, true);
         durationMS1 += System.currentTimeMillis() - start1;
         Long runningTime1 = durationMS1 / 1000;
-        System.out.println(runningTime1);
+        System.out.println(runningTime1);**/
 
         //System.out.println(controller.getMaxEntities("FT922-1149"));
         launch(args);

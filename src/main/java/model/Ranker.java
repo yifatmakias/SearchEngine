@@ -46,9 +46,9 @@ public class Ranker {
 
     public void rankDocs() {
         List<Map<String, List<Integer>>> parsedPostingLines = parsePostingLines();
-        double BM25FactorWeight = 0.6;
-        double inTitleFactorWeight = 0.2;
-        double positionFactorWeight = 0.2;
+        double BM25FactorWeight = 1;
+        double inTitleFactorWeight = 0;
+        double positionFactorWeight = 0;
         int k = 2;
         double b = 0.75;
         Map<String, Double> tempRankedDocs = new LinkedHashMap<>();
@@ -73,15 +73,13 @@ public class Ranker {
                 /**
                 if (querySynonyms != null && querySynonyms.containsKey(termInQuery)){
                     termDf += getDfToAdd(querySynonyms.get(termInQuery));
-                }
-                if (querySynonyms != null && querySynonyms.containsKey(termInQuery)){
                     List<Pair<String, String>> synonymPairsForQueryTerm = querySynonyms.get(termInQuery);
                     for (Pair<String, String> pair: synonymPairsForQueryTerm) {
                         String PostingLine = pair.getValue();
-                        String [] splitePostingLine = PostingLine.split("\\$");
-                        for (int j = 0; j < splitePostingLine.length - 1 ; j+=2) {
-                            if (splitePostingLine[j].equals(docNumber)){
-                                String [] docDataStrings = splitePostingLine[j+1].split(",");
+                        String [] splitedPostingLine = PostingLine.split("\\$");
+                        for (int j = 0; j < splitedPostingLine.length - 1 ; j+=2) {
+                            if (splitedPostingLine[j].equals(docNumber)){
+                                String [] docDataStrings = splitedPostingLine[j+1].split(",");
                                 termTf += Integer.valueOf(docDataStrings[0]);
                             }
                         }
