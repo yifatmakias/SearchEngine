@@ -54,6 +54,7 @@ public class Controller implements Runnable{
             this.uploadDictionary = new UploadDictionary(dicPath+"citiesDictionaryFile", dicPath+"dictionaryFile");
         }
         this.docsDataNoStart = new HashMap<>();
+        this.stopWords = new HashSet<>();
     }
 
     @Override
@@ -229,8 +230,13 @@ public class Controller implements Runnable{
         }
         Merge merge = new Merge(dicPath, upperLowerDic, toStem, cityMap);
         merge.merge();
-
-        File docsDataFile = new File(dicPath+"docsData");
+        File docsDataFile;
+        if (toStem){
+            docsDataFile = new File(dicPath+"stemmedDocsData");
+        }
+        else {
+            docsDataFile = new File(dicPath+"docsData");
+        }
         try {
             PrintWriter pw = new PrintWriter(docsDataFile);
             for (Iterator<Map.Entry<String, Doc>> it = docsData.entrySet().iterator(); it.hasNext();) {
@@ -316,10 +322,14 @@ public class Controller implements Runnable{
         return sortedResult;
     }
 
-    public Map<String, Double> runQuery(List<String> cities, String query, boolean toStem, boolean doSemantic) {
+    public Map<String, Double> runQuery(List<String> cities, String query, boolean toStem, boolean doSemantic, String description) {
         fillStopWordsSet();
         try {
-            BufferedReader br = new BufferedReader(new FileReader(this.dicPath + "docsData"));
+            BufferedReader br;
+            if (toStem)
+                br = new BufferedReader(new FileReader(this.dicPath + "stemmedDocsData"));
+            else
+                br = new BufferedReader(new FileReader(this.dicPath + "docsData"));
             String line = br.readLine();
             while (line != null) {
                 String[] splitedLine = line.split("\\$");
@@ -338,9 +348,16 @@ public class Controller implements Runnable{
         }
         Map<String, List<Integer>> dictionary = uploadDictionary.getDictionary();
         Map<String, List<String>> citiesDictionary = uploadDictionary.getCitiesDictionary();
-        Searcher searcher = new Searcher(query, dictionary, citiesDictionary, this.dicPath+"postingFile", toStem,  cities, dicPath+"citiesPostingFile", docsDataNoStart, doSemantic, stopWords);
+        String postingPath;
+        if (toStem)
+            postingPath = this.dicPath+"stemmedPostingFile";
+        else
+            postingPath = this.dicPath+"postingFile";
+
+        Searcher searcher = new Searcher(query, dictionary, citiesDictionary, postingPath, toStem,  cities, dicPath+"citiesPostingFile", docsDataNoStart, doSemantic, stopWords, description);
         searcher.queryHandle();
         //System.out.println(searcher.getResultForQuery());
+
         try {
             PrintWriter pw = new PrintWriter("C:/Users/yifat/Desktop/results50.txt");
             for (Map.Entry<String, Double> entry: searcher.getResultForQuery().entrySet()){

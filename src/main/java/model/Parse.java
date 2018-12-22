@@ -66,6 +66,7 @@ public class Parse {
             token = replaceChars(token, "&", "");
             token = replaceChars(token, "<", "");
             token = replaceChars(token, ">", "");
+            token = replaceChars(token, "?", "");
             token = token.replaceAll("--", "-");
 
 

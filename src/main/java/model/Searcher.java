@@ -22,9 +22,10 @@ public class Searcher {
     private Map<String, List<String>> citiesDictionary;
     private boolean doSemantic;
     private Set<String> stopWords;
+    private String description;
 
 
-    public Searcher(String query, Map<String, List<Integer>> dictionary, Map<String, List<String>> citiesDictionary, String postingPath, boolean toStem, List<String> chosenCities, String citiesPostingPath, Map<String, List<String>> docsMap, boolean doSemantic, Set<String> stopWords) {
+    public Searcher(String query, Map<String, List<Integer>> dictionary, Map<String, List<String>> citiesDictionary, String postingPath, boolean toStem, List<String> chosenCities, String citiesPostingPath, Map<String, List<String>> docsMap, boolean doSemantic, Set<String> stopWords, String description) {
         this.query = query;
         this.parse = new Parse(stopWords);
         this.postingPath = postingPath;
@@ -37,6 +38,7 @@ public class Searcher {
         this.citiesDictionary = citiesDictionary;
         this.doSemantic = doSemantic;
         this.stopWords = stopWords;
+        this.description = description;
     }
 
     public Map<String, Double> getResultForQuery() {
@@ -63,6 +65,17 @@ public class Searcher {
                 }
             }
             parse = new Parse(stopWords);
+        }
+        if (description != null || !description.equals("")){
+            parse.parse(null, description, toStem);
+            parse.removeStopWords();
+            Map<String, Term> descriptionTerms = parse.getTerms();
+            for (Iterator<Map.Entry<String, Term>> it = descriptionTerms.entrySet().iterator(); it.hasNext(); ) {
+                Map.Entry<String, Term> entry = it.next();
+                String descriptionTerm = entry.getKey();
+                if (!queryList.contains(descriptionTerm))
+                    queryList.add(descriptionTerm);
+            }
         }
         Map<String, List<Pair<String,String>>> querySynonyms = null;
         if (doSemantic) {
