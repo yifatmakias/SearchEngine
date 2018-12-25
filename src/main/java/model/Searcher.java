@@ -115,7 +115,14 @@ public class Searcher {
         docsForQuery.addAll(relevantDocsFromSynonyms);
         List<String> postingLinesCities = new ArrayList<>();
         for(String city: chosenCities) {
-            int cityPointer = Integer.valueOf(citiesDictionary.get(city).get(3));
+            int cityPointer;
+            List<String> cityData = citiesDictionary.get(city);
+            if (cityData == null)
+                cityData = citiesDictionary.get(city.toLowerCase());
+            if (cityData.size() == 1)
+                cityPointer = Integer.valueOf(cityData.get(0));
+            else
+                cityPointer = Integer.valueOf(cityData.get(3));
             try {
                 RandomAccessFile randomAccessFile = new RandomAccessFile(citiesPostingPath, "r");
                 randomAccessFile.seek(cityPointer);
