@@ -15,12 +15,11 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.fxml.FXML;
+import javafx.util.Pair;
 import model.Entity;
 import model.Result;
 import org.controlsfx.control.CheckComboBox;
-
 import static org.apache.commons.lang3.StringUtils.*;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -40,33 +39,16 @@ public class GUI {
     @FXML
     private TextField pathForDictionaryAndPosting;
     @FXML
-    private Button browse1;
-    @FXML
-    private Button browse2;
-    @FXML
     private javafx.scene.control.CheckBox stemming;
     @FXML
     private ComboBox languages;
-    @FXML
-    private Button start;
-    @FXML
-    private Button reset;
-    @FXML
-    private Button showDic;
-    @FXML
-    private Button loadDic;
     @FXML
     private TextField singleQuery;
     @FXML
     private TextField pathForQueryFile;
     @FXML
-    private Button runQuery;
-    @FXML
-    private Button showCitiesList;
-    @FXML
     private CheckBox semantic;
-    @FXML
-    private Button browse3;
+
 
     private Controller controller;
     private CheckComboBox<String> checkComboBox;
@@ -215,9 +197,6 @@ public class GUI {
             stage.setTitle("Dictionary");
             stage.show();
         }
-        else {
-            showErrorAlert("Please press start before trying to load dictionaries, or provide a path for an existing one");
-        }
     }
 
     /**
@@ -230,23 +209,25 @@ public class GUI {
             controller.uploadDictionaries();
             showInformationAlert("Loading dictionaries successfully.");
         }
-        else {
-            showErrorAlert("Please press start before trying to load dictionaries, or provide a path for an existing one");
-        }
     }
 
     /**
      * this function resets the memory and delets the files that were created during indexing operation.
      */
     public void reset(){
-        if (controller == null)
+        if (controller == null) {
             initControllerForExistingFiles();
-        if (controller != null){
-            controller.reset();
-            showInformationAlert("Reset system successfully.");
         }
-        else {
-            showErrorAlert("Please press start before trying to load dictionaries, or provide a path for an existing one");
+        if (controller != null){
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Reset");
+            alert.setHeaderText("");
+            alert.setContentText("Are you sure you want to reset the system?\n Notice that all the files will be deleted");
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.get() == ButtonType.OK) {
+                controller.reset();
+                showInformationAlert("Reset system successfully.");
+            }
         }
     }
 
@@ -326,35 +307,71 @@ public class GUI {
                 chosenCities.addAll(chosenCitiesObservable);
             }
             Map<String, Double> queryResult = controller.runQuery(chosenCities, query, stemming.isSelected(), semantic.isSelected(), "");
-            TableView<Result> tableView = new TableView<>();
-            addColumnsDocs(tableView);
-            ObservableList<Result> data = FXCollections.observableArrayList();
+            Random random = new Random();
+            int queryNum = random.nextInt(999);
+            List<Pair<String, Map<String, Double>>> queryResults = new ArrayList<>();
+            Pair<String, Map<String, Double>> queryPair = new Pair<>(String.valueOf(queryNum), queryResult);
+            queryResults.add(queryPair);
+            showQueryResult(queryResults);
+        }
+        else if (!pathForQueryFile.getText().equals("")) {
+            File queryFile = new File(pathForQueryFile.getText());
+            if (!queryFile.isFile()) {
+                showErrorAlert("The file is not valid, please enter a new one.");
+            }
+            else {
+                List<String> chosenCities = new ArrayList<>();
+                if (checkComboBox != null) {
+                    ObservableList<String> chosenCitiesObservable = checkComboBox.getCheckModel().getCheckedItems();
+                    chosenCities.addAll(chosenCitiesObservable);
+                }
+                List<Pair<String, Map<String, Double>>> queryResults = new ArrayList<>();
+                List<List<String>> parsedQueryFile = parseQueryFile(pathForQueryFile.getText());
+                for (List<String> queryDetails: parsedQueryFile) {
+                    String queryNum = queryDetails.get(0);
+                    String query = queryDetails.get(1);
+                    String desc = queryDetails.get(2);
+                    Map<String, Double> queryResult = controller.runQuery(chosenCities, query, stemming.isSelected(), semantic.isSelected(), "");
+                    Pair<String, Map<String, Double>> queryPair = new Pair<>(queryNum, queryResult);
+                    queryResults.add(queryPair);
+                }
+                showQueryResult(queryResults);
+            }
+        }
+    }
 
+    private void showQueryResult(List<Pair<String, Map<String, Double>>> queryResults) {
+        TableView<Result> tableView = new TableView<>();
+        addColumnsDocs(tableView);
+        ObservableList<Result> data = FXCollections.observableArrayList();
+        for (Pair<String, Map<String, Double>> queryPair: queryResults) {
+            String queryNum = queryPair.getKey();
+            Map<String, Double> queryResult = queryPair.getValue();
             for (Iterator<Map.Entry<String, Double>> it = queryResult.entrySet().iterator(); it.hasNext(); ) {
                 Map.Entry<String, Double> entry = it.next();
                 String docNumber = entry.getKey();
                 double rank = entry.getValue();
-                data.add(new Result(docNumber, String.valueOf(rank)));
+                data.add(new Result(String.valueOf(queryNum), docNumber, String.valueOf(rank)));
             }
-            tableView.setItems(data);
-            //FINALLY ADDED TO TableView
-            SplitPane splitPane = new SplitPane();
-            splitPane.setOrientation(Orientation.VERTICAL);
-            Button button1 = new Button("Save");
-            button1.setOnAction(click -> {
-                saveSingleQuery(tableView);
-            });
-            Button button2 = new Button("Show Entities for document");
-            button2.setOnAction(click -> {
-                showMaxEntities(tableView);
-            });
-            splitPane.getItems().addAll(tableView,button1, button2);
-            Scene scene = new Scene(splitPane);
-            Stage stage = new Stage();
-            stage.setTitle("Query Result");
-            stage.setScene(scene);
-            stage.show();
         }
+        tableView.setItems(data);
+        //FINALLY ADDED TO TableView
+        SplitPane splitPane = new SplitPane();
+        splitPane.setOrientation(Orientation.VERTICAL);
+        Button button1 = new Button("Save");
+        button1.setOnAction(click -> {
+            save(tableView);
+        });
+        Button button2 = new Button("Show Entities for document");
+        button2.setOnAction(click -> {
+            showMaxEntities(tableView);
+        });
+        splitPane.getItems().addAll(tableView,button1, button2);
+        Scene scene = new Scene(splitPane);
+        Stage stage = new Stage();
+        stage.setTitle("Query Result");
+        stage.setScene(scene);
+        stage.show();
     }
 
     private void showMaxEntities(TableView<Result> tableView) {
@@ -395,7 +412,7 @@ public class GUI {
         }
     }
 
-    private void saveSingleQuery(TableView<Result> tableView){
+    private void save(TableView<Result> tableView){
         if (tableView.getItems().size() == 0) {
             showInformationAlert("There is no results to save.");
             return;
@@ -407,18 +424,15 @@ public class GUI {
         File savedFile = fileChooser.showSaveDialog(savedStage);
         if (savedFile != null) {
             try {
-                Random random = new Random();
-                int queryId = random.nextInt(999);
                 PrintWriter pw = new PrintWriter(savedFile);
                 ObservableList<Result> resultList = tableView.getItems();
                 for (int i = 0; i < resultList.size(); i++) {
                     Result result = resultList.get(i);
-
-                    pw.println(queryId + " " + "0" + " " + result.getDocNumber() + " " + "1" + " " + result.getRank() + " " + "mt");
+                    pw.println(result.getQueryNum() + " " + "0" + " " + result.getDocNumber() + " " + "1" + " " + result.getRank() + " " + "mt");
                 }
                 pw.flush();
                 pw.close();
-                showInformationAlert("The query result was saved successfully.");
+                showInformationAlert("The query/queries result was saved successfully.");
             } catch (Exception e) {
                 e.printStackTrace();
                 return;
@@ -427,11 +441,13 @@ public class GUI {
     }
 
     private void addColumnsDocs(TableView<Result> tableView) {
-        TableColumn <Result,String> clm1 = new TableColumn("Document Number");
-        clm1.setCellValueFactory(new PropertyValueFactory<>("docNumber"));
-        TableColumn <Result,String> clm2 = new TableColumn("Rank");
-        clm2.setCellValueFactory(new PropertyValueFactory<>("rank"));
-        tableView.getColumns().addAll(clm1,clm2);
+        TableColumn <Result,String> clm1 = new TableColumn("Query Number");
+        clm1.setCellValueFactory(new PropertyValueFactory<>("queryNum"));
+        TableColumn <Result,String> clm2 = new TableColumn("Document Number");
+        clm2.setCellValueFactory(new PropertyValueFactory<>("docNumber"));
+        TableColumn <Result,String> clm3 = new TableColumn("Rank");
+        clm3.setCellValueFactory(new PropertyValueFactory<>("rank"));
+        tableView.getColumns().addAll(clm1,clm2, clm3);
     }
 
     private void addColumnsEntities(TableView<Entity> tableView) {
@@ -470,6 +486,37 @@ public class GUI {
             //System.out.println(checkComboBox.getItems().size());
             gridPane.add(checkComboBox, 1,4);
         }
+    }
+
+    public List<List<String>> parseQueryFile(String queriesPath) {
+        List<List<String>> parsedQueryFile = new ArrayList<>();
+        try {
+            File f = new File(queriesPath);
+            BufferedReader br = new BufferedReader(new FileReader(f));
+            StringBuilder sb = new StringBuilder();
+            String line = br.readLine();
+            while (line != null) {
+                sb.append(line);
+                line = br.readLine();
+            }
+
+            String [] tops = sb.toString().split("</top>");
+            for (String top: tops) {
+                String [] splitedTop = top.split("<\\S+>");
+                String num = splitedTop[1].split("Number: ")[1].trim();
+                String title = splitedTop[2].trim();
+                String desc = splitedTop[3].split("Description: ")[1].trim();
+                List<String> queryDetail = new ArrayList<>();
+                queryDetail.add(num);
+                queryDetail.add(title);
+                queryDetail.add(desc);
+                parsedQueryFile.add(queryDetail);
+            }
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+        return parsedQueryFile;
     }
 
     /**

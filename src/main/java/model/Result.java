@@ -1,10 +1,12 @@
 package model;
 
 public class Result {
+    private String queryNum;
     private String docNumber;
     private String rank;
 
-    public Result(String docNumber, String rank) {
+    public Result(String queryNum, String docNumber, String rank) {
+        this.queryNum = queryNum;
         this.docNumber = docNumber;
         this.rank = rank;
     }
@@ -15,5 +17,9 @@ public class Result {
 
     public String getRank() {
         return rank;
+    }
+
+    public String getQueryNum() {
+        return queryNum;
     }
 }

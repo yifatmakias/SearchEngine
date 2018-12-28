@@ -330,8 +330,6 @@ public class Controller implements Runnable{
             }
         }
         sortedResult = unsortedResult.entrySet().stream().sorted(reverseOrder(Map.Entry.comparingByValue())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
-        //unsortedResult.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).forEachOrdered(x -> sortedResult.put(x.getKey(), x.getValue()));
-        //sortedResult = getfirstFiveEntities(sortedResult);
         return sortedResult;
     }
 
@@ -369,20 +367,6 @@ public class Controller implements Runnable{
 
         Searcher searcher = new Searcher(query, dictionary, citiesDictionary, postingPath, toStem,  cities, dicPath+"citiesPostingFile", docsDataNoStart, doSemantic, stopWords, description);
         searcher.queryHandle();
-        /**
-        System.out.println(searcher.getResultForQuery());
-
-        try {
-            PrintWriter pw = new PrintWriter("C:/Users/yifat/Desktop/results50.txt");
-            for (Map.Entry<String, Double> entry: searcher.getResultForQuery().entrySet()){
-                //pw.println("352" + " 0 " + entry.getKey() + " 1 " + entry.getValue() + " mt");
-                System.out.println("352" + " 0 " + entry.getKey() + " 1 " + entry.getValue() + " mt");
-            }
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-        System.out.println(searcher.getResultForQuery().size());**/
         return searcher.getResultForQuery();
     }
 

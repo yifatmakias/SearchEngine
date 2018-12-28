@@ -46,13 +46,13 @@ public class Ranker {
 
     public void rankDocs() {
         List<Map<String, List<Integer>>> parsedPostingLines = parsePostingLines();
-        double BM25FactorWeight = 1;
-        double inTitleFactorWeight = 0;
-        double positionFactorWeight = 0;
-        int k = 2;
+        double BM25FactorWeight = 0.8;
+        double inTitleFactorWeight = 0.1;
+        double positionFactorWeight = 0.1;
+        double k = 1.2;
         double b = 0.75;
         Map<String, Double> tempRankedDocs = new LinkedHashMap<>();
-
+        boolean firstDoc = true;
         for (Iterator<Entry<String, Integer>> it = docsToRank.entrySet().iterator(); it.hasNext(); ) {
             Entry<String, Integer> entry = it.next();
             String docNumber= entry.getKey();
@@ -70,46 +70,41 @@ public class Ranker {
                 int termTf = docData.get(0);
                 int isInTitle = docData.get(1);
                 int firstPosition = docData.get(2);
-                /**
-                if (querySynonyms != null && querySynonyms.containsKey(termInQuery)){
-                    termDf += getDfToAdd(querySynonyms.get(termInQuery));
-                    List<Pair<String, String>> synonymPairsForQueryTerm = querySynonyms.get(termInQuery);
-                    for (Pair<String, String> pair: synonymPairsForQueryTerm) {
-                        String PostingLine = pair.getValue();
-                        String [] splitedPostingLine = PostingLine.split("\\$");
-                        for (int j = 0; j < splitedPostingLine.length - 1 ; j+=2) {
-                            if (splitedPostingLine[j].equals(docNumber)){
-                                String [] docDataStrings = splitedPostingLine[j+1].split(",");
-                                termTf += Integer.valueOf(docDataStrings[0]);
-                            }
-                        }
-                    }
-                }**/
+                double Mplus1 = docsCount_M + 1.0;
                 // the formula for BM25 factor - for the specific doc.
-                BM25Factor += (countTermInQuery * (k+1)* termTf * Math.log10((docsCount_M+1)/termDf)) / (termTf * k * (1- b + b * (docLength/avdl)));
+                BM25Factor += (countTermInQuery * (k+1.0)* termTf * Math.log10(Mplus1/termDf)) / (termTf * k * (1.0- b) + (b * (docLength/avdl)));
                 // the formula for inTitle factor - for the specific doc.
                 inTitleFactor += isInTitle;
                 // the formula for position factor - for the specific doc.
                 positionFactor+= (docLength - firstPosition) / docLength;
+                /**
+                if (firstDoc) {
+                    System.out.println("doc number: "+ docNumber);
+                    System.out.println(termInQuery +":");
+                    System.out.println("count term in query: " + countTermInQuery);
+                    System.out.println("k+1: " + (k+1.0));
+                    System.out.println("term tf: " + termTf);
+                    System.out.println("M: " + docsCount_M);
+                    System.out.println("M+1: " + Mplus1);
+                    System.out.println("term df: " + termDf);
+                    System.out.println("b: " + b);
+                    System.out.println("doc length: " + docLength);
+                    System.out.println("avdl: " + avdl);
+                    System.out.println("1-b: " + (1.0- b));
+                    System.out.println("first position: " + firstPosition);
+                    System.out.println("doc - first position: " + (docLength - firstPosition));
+                }**/
             }
-            double rank = BM25FactorWeight * BM25Factor + inTitleFactorWeight * inTitleFactor + positionFactorWeight * positionFactor;
+            /**
+            if (firstDoc) {
+                System.out.println(BM25Factor);
+            }**/
+            double rank = (BM25FactorWeight * BM25Factor) + (inTitleFactorWeight * inTitleFactor) + (positionFactorWeight * positionFactor);
             tempRankedDocs.put(docNumber, rank);
+            firstDoc = false;
         }
         tempRankedDocs.entrySet().stream().sorted(Entry.comparingByValue(Comparator.reverseOrder())).forEachOrdered(x -> this.rankedDocs.put(x.getKey(), x.getValue()));
         this.rankedDocs = getfirstFiftyDocs(rankedDocs);
-    }
-
-    private int getDfToAdd(List<Pair<String, String>> synonymsList) {
-        int dfToAdd = 0;
-        for (Pair<String, String> synonymPair: synonymsList) {
-            String synonym = synonymPair.getKey();
-            for (Pair<String, Integer> synonymData: this.synonymsData) {
-                if (synonymData.getKey().equals(synonym)){
-                    dfToAdd += synonymData.getValue();
-                }
-            }
-        }
-        return dfToAdd;
     }
 
     private List<Map<String, List<Integer>>> parsePostingLines(){
