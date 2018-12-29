@@ -66,6 +66,10 @@ public class Searcher {
             }
             parse = new Parse(stopWords);
         }
+        Map<String, List<Pair<String,String>>> querySynonyms = null;
+        if (doSemantic) {
+            querySynonyms = getSynonyms(queryList);
+        }
         if (description != null || !description.equals("")){
             parse.parse(null, description, toStem);
             parse.removeStopWords();
@@ -76,10 +80,6 @@ public class Searcher {
                 if (!queryList.contains(descriptionTerm))
                     queryList.add(descriptionTerm);
             }
-        }
-        Map<String, List<Pair<String,String>>> querySynonyms = null;
-        if (doSemantic) {
-            querySynonyms = getSynonyms(queryList);
         }
         double docsCount_M = this.docsMap.size();
         long sumDocsLength = 0;
@@ -177,7 +177,7 @@ public class Searcher {
                 }
                 br.close();
                 JSONArray jsonArray = new JSONArray(jsonString);
-                int maxWords = 5;
+                int maxWords = 2;
                 int countWords = 1;
                 for (int i = 0; i < jsonArray.length(); i++) {
                     if (countWords > maxWords)

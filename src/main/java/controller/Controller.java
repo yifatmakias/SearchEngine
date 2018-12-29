@@ -294,9 +294,9 @@ public class Controller implements Runnable{
         }
     }
 
-    public Map<String, Integer> getMaxEntities(String docNumber) {
-        Map<String, Integer> unsortedResult = new LinkedHashMap<>();
-        Map<String, Integer> sortedResult;
+    public Map<String, Double> getMaxEntities(String docNumber) {
+        Map<String, Double> unsortedResult = new LinkedHashMap<>();
+        Map<String, Double> sortedResult;
 
         List<String> docData = this.docsDataNoStart.get(docNumber);
         for (int i = 2; i < docData.size() ; i++) {
@@ -319,8 +319,10 @@ public class Controller implements Runnable{
                     for (int j = 0; j < splitedLine.length - 1; j += 2) {
                         if (docNumber.equals(splitedLine[j])) {
                             String [] splitedData = splitedLine[j+1].split(",");
-                            int tf = Integer.valueOf(splitedData[0]);
-                            unsortedResult.put(entity.toUpperCase(), tf);
+                            double tf = Double.valueOf(splitedData[0]);
+                            double docLength = Double.valueOf(this.docsDataNoStart.get(docNumber).get(0));
+                            double entityRank = tf / docLength;
+                            unsortedResult.put(entity.toUpperCase(), entityRank);
                         }
                     }
                 }
@@ -330,6 +332,7 @@ public class Controller implements Runnable{
             }
         }
         sortedResult = unsortedResult.entrySet().stream().sorted(reverseOrder(Map.Entry.comparingByValue())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+        sortedResult = getfirstFiveEntities(sortedResult);
         return sortedResult;
     }
 
@@ -370,12 +373,12 @@ public class Controller implements Runnable{
         return searcher.getResultForQuery();
     }
 
-    public Map<String, Integer> getfirstFiveEntities(Map<String, Integer> sortedEntities) {
-        Map<String, Integer> firstFive = new LinkedHashMap<>();
-        int maxEntities = 1;
+    public Map<String, Double> getfirstFiveEntities(Map<String, Double> sortedEntities) {
+        Map<String, Double> firstFive = new LinkedHashMap<>();
+        int maxEntities = 5;
         int countEntities = 1;
 
-        for (Map.Entry<String, Integer> entry: sortedEntities.entrySet()){
+        for (Map.Entry<String, Double> entry: sortedEntities.entrySet()){
             if (countEntities > maxEntities)
                 break;
             firstFive.put(entry.getKey(), entry.getValue());

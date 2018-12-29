@@ -72,7 +72,9 @@ public class Ranker {
                 int firstPosition = docData.get(2);
                 double Mplus1 = docsCount_M + 1.0;
                 // the formula for BM25 factor - for the specific doc.
-                BM25Factor += (countTermInQuery * (k+1.0)* termTf * Math.log10(Mplus1/termDf)) / (termTf * k * (1.0- b) + (b * (docLength/avdl)));
+                //BM25Factor += (countTermInQuery * (k+1.0)* termTf * Math.log10(Mplus1/termDf)) / (termTf * k * (1.0- b) + (b * (docLength/avdl)));
+                double IDF = Math.log10((docsCount_M - termDf + 0.5)/(termDf + 0.5));
+                BM25Factor += (termTf * (k+1.0)* IDF) / (termTf + k * (1.0- b) + (b * (docLength/avdl)));
                 // the formula for inTitle factor - for the specific doc.
                 inTitleFactor += isInTitle;
                 // the formula for position factor - for the specific doc.
@@ -86,7 +88,9 @@ public class Ranker {
                     System.out.println("term tf: " + termTf);
                     System.out.println("M: " + docsCount_M);
                     System.out.println("M+1: " + Mplus1);
+                    System.out.println("M - df + 0.5: " + (docsCount_M - termDf + 0.5));
                     System.out.println("term df: " + termDf);
+                    System.out.println("term df + 0.5: " + (termDf + 0.5));
                     System.out.println("b: " + b);
                     System.out.println("doc length: " + docLength);
                     System.out.println("avdl: " + avdl);

@@ -331,7 +331,7 @@ public class GUI {
                     String queryNum = queryDetails.get(0);
                     String query = queryDetails.get(1);
                     String desc = queryDetails.get(2);
-                    Map<String, Double> queryResult = controller.runQuery(chosenCities, query, stemming.isSelected(), semantic.isSelected(), "");
+                    Map<String, Double> queryResult = controller.runQuery(chosenCities, query, stemming.isSelected(), semantic.isSelected(), desc);
                     Pair<String, Map<String, Double>> queryPair = new Pair<>(queryNum, queryResult);
                     queryResults.add(queryPair);
                 }
@@ -384,7 +384,7 @@ public class GUI {
         }
         else {
             Result result = chosenDoc.get(0);
-            Map<String, Integer> entitiesMap = controller.getMaxEntities(result.getDocNumber());
+            Map<String, Double> entitiesMap = controller.getMaxEntities(result.getDocNumber());
             if (entitiesMap.size() == 0){
                 showInformationAlert("There are no entities for this document.");
                 return;
@@ -393,10 +393,10 @@ public class GUI {
             addColumnsEntities(entitiesTableView);
             ObservableList<Entity> data = FXCollections.observableArrayList();
 
-            for (Iterator<Map.Entry<String, Integer>> it = entitiesMap.entrySet().iterator(); it.hasNext(); ) {
-                Map.Entry<String, Integer> entry = it.next();
+            for (Iterator<Map.Entry<String, Double>> it = entitiesMap.entrySet().iterator(); it.hasNext(); ) {
+                Map.Entry<String, Double> entry = it.next();
                 String entityName = entry.getKey();
-                int entityRank = entry.getValue();
+                double entityRank = entry.getValue();
                 data.add(new Entity(entityName, String.valueOf(entityRank)));
             }
             entitiesTableView.setItems(data);
@@ -472,17 +472,18 @@ public class GUI {
             //System.out.println(citiesDictionary.size());
             Map<String, List<String>> sortedCities;
             sortedCities = citiesDictionary.entrySet().stream().sorted(Map.Entry.comparingByKey()).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
-            //System.out.println(sortedCities.size());
             ObservableList<String> citiesList = FXCollections.observableArrayList();
             for (Iterator<Map.Entry<String, List<String>>> it = sortedCities.entrySet().iterator(); it.hasNext(); ) {
                 Map.Entry<String, List<String>> entry = it.next();
                 String city = entry.getKey();
-                citiesList.add(city.toUpperCase());
+                if (!city.matches(".*\\d+.*"))
+                    citiesList.add(city.toUpperCase());
             }
             //System.out.println(citiesList);
             //System.out.println(citiesList.size());
             checkComboBox = new CheckComboBox<>();
             checkComboBox.getItems().setAll(citiesList);
+            checkComboBox.autosize();
             //System.out.println(checkComboBox.getItems().size());
             gridPane.add(checkComboBox, 1,4);
         }
