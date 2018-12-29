@@ -57,7 +57,7 @@ public class GUI {
     }
 
     /**
-     * first browse function, opens the browse directory option.
+     * First browse function, opens the browse directory option for corpus and stop words dir.
      */
     public void browseCorpusDir(){
         DirectoryChooser chooser = new DirectoryChooser();
@@ -71,7 +71,7 @@ public class GUI {
     }
 
     /**
-     * second browse function, opens the browse directory option.
+     * Second browse function, opens the browse directory option for posting files dir.
      */
     public void browsePostingDir(){
         DirectoryChooser chooser = new DirectoryChooser();
@@ -84,6 +84,9 @@ public class GUI {
         }
     }
 
+    /**
+     * Third browse function, opens the browse file option to choose a queries file.
+     */
     public void browseQueryFile(){
         FileChooser fileChooser = new FileChooser();
         File selectedFile = fileChooser.showOpenDialog(new Stage());
@@ -97,8 +100,8 @@ public class GUI {
 
 
     /**
-     * on action for the start button.
-     * show the results from the start button to an information alert.
+     * On action for the start button.
+     * Shows the results from the start button to an information alert.
      */
     public void startClicked(){
         String corpusAndStopWordsPath = this.pathForCorpusAndStopWords.getText();
@@ -142,7 +145,7 @@ public class GUI {
     }
 
     /**
-     * this function shows the dictionary after starting the system, or loading a valid dictionary path.
+     * This function shows the dictionary after starting the system, or loading a valid dictionary path.
      */
     public void showDic(){
         if (controller == null)
@@ -188,7 +191,7 @@ public class GUI {
     }
 
     /**
-     * this function loads the dictionaries to the memory.
+     * This function loads the dictionaries to the memory.
      */
     public void loadDictionaries(){
         if (controller == null || stemStatus != stemming.isSelected())
@@ -199,8 +202,8 @@ public class GUI {
         }
     }
 
-    /**
-     * this function resets the memory and delets the files that were created during indexing operation.
+    /**א
+     * This function resets the memory and delets the files that were created during indexing operation.
      */
     public void reset(){
         if (controller == null) {
@@ -220,7 +223,7 @@ public class GUI {
     }
 
     /**
-     * this is an helper function, that initiate the controller object if a path was given.
+     * This is an helper function, that initiate the controller object if a path was given.
      */
     public void initControllerForExistingFiles() {
         if (this.pathForCorpusAndStopWords.getText().equals("") || this.pathForDictionaryAndPosting.getText().equals(""))
@@ -272,6 +275,9 @@ public class GUI {
         }
     }
 
+    /**
+     * This function runs a query that was entered to the single query textField or to the queryFile textField.
+     */
     public void runQuery() {
         if (stemming.isSelected() != stemStatus){
             showInformationAlert("You changed the stemming checkbox, please load the dictionaries again.");
@@ -287,7 +293,7 @@ public class GUI {
         if ((pathForQueryFile.getText().equals("") && singleQuery.getText().equals("")) || (!pathForQueryFile.getText().equals("") && !singleQuery.getText().equals(""))){
             showErrorAlert("Please enter a single query or a query file before run query.");
         }
-        else if (!singleQuery.getText().equals("")) {
+        else if (!singleQuery.getText().equals("")) { // single query
             String query = singleQuery.getText();
             String chosenLanguage = "";
             if (languagesComboBox != null) {
@@ -306,7 +312,7 @@ public class GUI {
             queryResults.add(queryPair);
             showQueryResult(queryResults);
         }
-        else if (!pathForQueryFile.getText().equals("")) {
+        else if (!pathForQueryFile.getText().equals("")) { // query file.
             File queryFile = new File(pathForQueryFile.getText());
             if (!queryFile.isFile()) {
                 showErrorAlert("The file is not valid, please enter a new one.");
@@ -336,6 +342,9 @@ public class GUI {
         }
     }
 
+    /**
+     * Helper function - shows the query result.
+     */
     private void showQueryResult(List<Pair<String, Map<String, Double>>> queryResults) {
         TableView<Result> tableView = new TableView<>();
         addColumnsDocs(tableView);
@@ -370,6 +379,9 @@ public class GUI {
         stage.show();
     }
 
+    /**
+     * Helper function - shows the max entities.
+     */
     private void showMaxEntities(TableView<Result> tableView) {
         ObservableList<Result> chosenDoc = tableView.getSelectionModel().getSelectedItems();
         if (chosenDoc.size() < 1) {
@@ -408,6 +420,9 @@ public class GUI {
         }
     }
 
+    /**
+     * Helper function - saves the table view result to a file.
+     */
     private void save(TableView<Result> tableView){
         if (tableView.getItems().size() == 0) {
             showInformationAlert("There is no results to save.");
@@ -436,6 +451,9 @@ public class GUI {
         }
     }
 
+    /**
+     * Helper function - adds columns to Result table view.
+     */
     private void addColumnsDocs(TableView<Result> tableView) {
         TableColumn <Result,String> clm1 = new TableColumn("Query Number");
         clm1.setCellValueFactory(new PropertyValueFactory<>("queryNum"));
@@ -446,6 +464,9 @@ public class GUI {
         tableView.getColumns().addAll(clm1,clm2, clm3);
     }
 
+    /**
+     * Helper function - adds columns to Entity table view.
+     */
     private void addColumnsEntities(TableView<Entity> tableView) {
         TableColumn <Entity,String> clm1 = new TableColumn("Entity Name");
         clm1.setCellValueFactory(new PropertyValueFactory<>("entityName"));
@@ -454,6 +475,9 @@ public class GUI {
         tableView.getColumns().addAll(clm1,clm2);
     }
 
+    /**
+     * This function shows the cities list.
+     */
     public void showCitiesList(){
         if (controller == null){
             initControllerForExistingFiles();
@@ -465,9 +489,6 @@ public class GUI {
         }
         else {
             Map<String, List<String>> citiesDictionary = controller.getUploadDictionary().getCitiesDictionary();
-            //System.out.println(citiesDictionary.size());
-            Map<String, List<String>> sortedCities;
-            //sortedCities = citiesDictionary.entrySet().stream().sorted(Map.Entry.comparingByKey()).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
             ObservableList<String> citiesList = FXCollections.observableArrayList();
             for (Iterator<Map.Entry<String, List<String>>> it = citiesDictionary.entrySet().iterator(); it.hasNext(); ) {
                 Map.Entry<String, List<String>> entry = it.next();
@@ -482,6 +503,9 @@ public class GUI {
         }
     }
 
+    /**
+     * This function shows the languages list.
+     */
     public void showLanguagesList(){
         if (controller == null){
             initControllerForExistingFiles();
@@ -529,6 +553,9 @@ public class GUI {
         }
     }
 
+    /**
+     * This function parse the query file and returns a map that represent it.
+     */
     public List<List<String>> parseQueryFile(String queriesPath) {
         List<List<String>> parsedQueryFile = new ArrayList<>();
         try {

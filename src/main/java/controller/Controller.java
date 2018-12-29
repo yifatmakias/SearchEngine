@@ -299,6 +299,9 @@ public class Controller implements Runnable{
         }
     }
 
+    /**
+     * This function returns a max entity map by a given document number.
+     */
     public Map<String, Double> getMaxEntities(String docNumber) {
         Map<String, Double> unsortedResult = new LinkedHashMap<>();
         Map<String, Double> sortedResult;
@@ -341,6 +344,16 @@ public class Controller implements Runnable{
         return sortedResult;
     }
 
+    /**
+     * This function gets all data from gui and runs a query.
+     * @param cities - list of chosen cities, can be empty.
+     * @param query - the query string.
+     * @param toStem - true if stemming option was chosen, false if not.
+     * @param doSemantic - true if the semantic option was chosen, false if not.
+     * @param description - description if the query was given by a query file. description is empty if the query was a single query.
+     * @param docLanguage - chosen doc language, can be empty.
+     * @return - a map of 50 relevant documents and there rank.
+     */
     public Map<String, Double> runQuery(List<String> cities, String query, boolean toStem, boolean doSemantic, String description, String docLanguage) {
         fillStopWordsSet();
         try {
@@ -380,6 +393,9 @@ public class Controller implements Runnable{
         return searcher.getResultForQuery();
     }
 
+    /**
+     * This function returns the five most important entities from the given entities map.
+     */
     public Map<String, Double> getfirstFiveEntities(Map<String, Double> sortedEntities) {
         Map<String, Double> firstFive = new LinkedHashMap<>();
         int maxEntities = 5;

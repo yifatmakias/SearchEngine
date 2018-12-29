@@ -33,7 +33,6 @@ public class Searcher {
         this.toStem = toStem;
         this.chosenCities = chosenCities;
         this.citiesPostingPath = citiesPostingPath;
-        this.docsMap = new HashMap<>();
         this.docsMap = docsMap;
         this.dictionary = dictionary;
         this.citiesDictionary = citiesDictionary;
@@ -43,10 +42,16 @@ public class Searcher {
         this.docLanguage = docLanguage;
     }
 
+    /**
+     * Returns query result
+     */
     public Map<String, Double> getResultForQuery() {
         return resultForQuery;
     }
 
+    /**
+     * Handles the query - sending to to ranker and returning the query result.
+     */
     public void queryHandle() {
         Ranker ranker;
         String [] querySplit = query.split(" ");
@@ -153,11 +158,14 @@ public class Searcher {
                 relevantDocsForRenker.put(docNumber,docLength);
             }
         }
-        ranker = new Ranker(queryToRanker, relevantDocsForRenker, docsCount_M, avdl, postingLinesToRanker, querySynonyms, synonymsDataToRanker, synonymsPostingLines);
+        ranker = new Ranker(queryToRanker, relevantDocsForRenker, docsCount_M, avdl, postingLinesToRanker, synonymsDataToRanker, synonymsPostingLines);
         ranker.rankDocs();
         this.resultForQuery = ranker.getRankedDocs();
     }
 
+    /**
+     * Helper function - given a list of posting lines, the function returns only the docs numbers.
+     */
     private Set<String> getRelevantDocsForQuery(List<String> postingLines) {
         Set<String> docsForQuery = new HashSet<>();
         for (String postingLine : postingLines) {
@@ -170,6 +178,9 @@ public class Searcher {
         return docsForQuery;
     }
 
+    /**
+     * Helper function - given a list of query terms, the function returns the synonyms of all the terms, using an api.
+     */
     private  Map<String, List<Pair<String,String>>> getSynonyms(List<String> queryTerms) {
         Map<String, List<Pair<String, String>>> querySynonyms = new HashMap<>();
         try {
@@ -223,6 +234,9 @@ public class Searcher {
         return querySynonyms;
     }
 
+    /**
+     * Helper function  - adds posting lines to the posting lines list according to the query terms.
+     */
     private void addRelevantPostingLines(List<String> postingLinesToRanker, List<String> queryTermsList, List<Pair<String, Integer>> queryToRanker){
         for (int i=0; i< queryTermsList.size(); i++) {
             String queryString = queryTermsList.get(i);
@@ -249,6 +263,10 @@ public class Searcher {
         }
     }
 
+    /**
+     * This function gets synonyms data for each synonym word.
+     * data = df
+     */
     public void getSynonymsData(List<Pair<String, String>> synonyms, List<Pair<String, Integer>> synonymsData) {
         for (int i=0; i< synonyms.size(); i++) {
             String queryString = synonyms.get(i).getKey();

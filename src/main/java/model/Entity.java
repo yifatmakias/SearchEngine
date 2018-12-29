@@ -4,6 +4,9 @@ public class Entity {
     private String entityName;
     private String entityRank;
 
+    /**
+     * Entity class to show in table view.
+     */
     public Entity(String entityName, String entityRank) {
         this.entityName = entityName;
         this.entityRank = entityRank;

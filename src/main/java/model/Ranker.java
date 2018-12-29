@@ -13,28 +13,32 @@ public class Ranker {
     private double docsCount_M;
     private double avdl; // the average length of the docs in corpus.
     private List<String> postingLines;
-    private Map<String, List<Pair<String, String>>> querySynonyms;
     private List<Pair<String, Integer>> synonymsData;
-    private List<String> synynomPostingLines;
+    private List<String> synonymPostingLines;
 
-    public Ranker(List<Pair<String, Integer>> query, Map<String,Integer> docsToRank, double docsCount_M, double avdl, List<String> postingLines,Map<String, List<Pair<String, String>>> querySynonyms, List<Pair<String, Integer>> synonymsData, List<String> synynomPostingLines) {
+    public Ranker(List<Pair<String, Integer>> query, Map<String,Integer> docsToRank, double docsCount_M, double avdl, List<String> postingLines, List<Pair<String, Integer>> synonymsData, List<String> synonymPostingLines) {
         this.query = query;
         this.docsToRank = docsToRank;
         this.rankedDocs = new LinkedHashMap<>();
         this.docsCount_M = docsCount_M;
         this.avdl = avdl;
         this.postingLines = postingLines;
-        this.querySynonyms = querySynonyms;
         this.synonymsData = synonymsData;
-        this.synynomPostingLines = synynomPostingLines;
+        this.synonymPostingLines = synonymPostingLines;
         this.query.addAll(synonymsData);
     }
 
+    /**
+     * returns the map of ranked docs.
+     */
     public Map<String, Double> getRankedDocs() {
         return rankedDocs;
     }
 
-    public int countTermInQuery(String term) {
+    /**
+     * returns the number of times the given term appears in the query.
+     */
+    private int countTermInQuery(String term) {
         int result = 0;
         for (Pair<String, Integer> wordPair: query) {
             if (wordPair.getKey().equals(term)){
@@ -44,6 +48,10 @@ public class Ranker {
         return result;
     }
 
+    /**
+     * This function is the main function of the ranker class.
+     * The function rank all the documents and return the 50 documents with the highest rank.
+     */
     public void rankDocs() {
         List<Map<String, List<Integer>>> parsedPostingLines = parsePostingLines();
         double BM25FactorWeight = 0.8;
@@ -52,7 +60,6 @@ public class Ranker {
         double k = 1.2;
         double b = 0.75;
         Map<String, Double> tempRankedDocs = new LinkedHashMap<>();
-        boolean firstDoc = true;
         for (Iterator<Entry<String, Integer>> it = docsToRank.entrySet().iterator(); it.hasNext(); ) {
             Entry<String, Integer> entry = it.next();
             String docNumber= entry.getKey();
@@ -79,42 +86,22 @@ public class Ranker {
                 inTitleFactor += isInTitle;
                 // the formula for position factor - for the specific doc.
                 positionFactor+= (docLength - firstPosition) / docLength;
-                /**
-                if (firstDoc) {
-                    System.out.println("doc number: "+ docNumber);
-                    System.out.println(termInQuery +":");
-                    System.out.println("count term in query: " + countTermInQuery);
-                    System.out.println("k+1: " + (k+1.0));
-                    System.out.println("term tf: " + termTf);
-                    System.out.println("M: " + docsCount_M);
-                    System.out.println("M+1: " + Mplus1);
-                    System.out.println("M - df + 0.5: " + (docsCount_M - termDf + 0.5));
-                    System.out.println("term df: " + termDf);
-                    System.out.println("term df + 0.5: " + (termDf + 0.5));
-                    System.out.println("b: " + b);
-                    System.out.println("doc length: " + docLength);
-                    System.out.println("avdl: " + avdl);
-                    System.out.println("1-b: " + (1.0- b));
-                    System.out.println("first position: " + firstPosition);
-                    System.out.println("doc - first position: " + (docLength - firstPosition));
-                }**/
             }
-            /**
-            if (firstDoc) {
-                System.out.println(BM25Factor);
-            }**/
+
             double rank = (BM25FactorWeight * BM25Factor) + (inTitleFactorWeight * inTitleFactor) + (positionFactorWeight * positionFactor);
             tempRankedDocs.put(docNumber, rank);
-            firstDoc = false;
         }
         tempRankedDocs.entrySet().stream().sorted(Entry.comparingByValue(Comparator.reverseOrder())).forEachOrdered(x -> this.rankedDocs.put(x.getKey(), x.getValue()));
         this.rankedDocs = getfirstFiftyDocs(rankedDocs);
     }
 
+    /**
+     * Helper function - this function parses the posting lines.
+     */
     private List<Map<String, List<Integer>>> parsePostingLines(){
         List<String> allPostingLines = new ArrayList<>();
         allPostingLines.addAll(postingLines);
-        allPostingLines.addAll(synynomPostingLines);
+        allPostingLines.addAll(synonymPostingLines);
         List<Map<String, List<Integer>>> parsedPostingLines = new ArrayList<>();
         for (String postingLine: allPostingLines){
             String [] splitLine = postingLine.split("\\$");
@@ -133,6 +120,9 @@ public class Ranker {
         return parsedPostingLines;
     }
 
+    /**
+     * Helper function - returns the 50 documents with the highest rank.
+     */
     private Map<String, Double> getfirstFiftyDocs(Map<String, Double> sortedDocs) {
         Map<String, Double> firstFifty = new LinkedHashMap<>();
         int maxDocs = 50;
