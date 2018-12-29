@@ -23,9 +23,10 @@ public class Searcher {
     private boolean doSemantic;
     private Set<String> stopWords;
     private String description;
+    private String docLanguage;
 
 
-    public Searcher(String query, Map<String, List<Integer>> dictionary, Map<String, List<String>> citiesDictionary, String postingPath, boolean toStem, List<String> chosenCities, String citiesPostingPath, Map<String, List<String>> docsMap, boolean doSemantic, Set<String> stopWords, String description) {
+    public Searcher(String query, Map<String, List<Integer>> dictionary, Map<String, List<String>> citiesDictionary, String postingPath, boolean toStem, List<String> chosenCities, String citiesPostingPath, Map<String, List<String>> docsMap, boolean doSemantic, Set<String> stopWords, String description, String docLanguage) {
         this.query = query;
         this.parse = new Parse(stopWords);
         this.postingPath = postingPath;
@@ -39,6 +40,7 @@ public class Searcher {
         this.doSemantic = doSemantic;
         this.stopWords = stopWords;
         this.description = description;
+        this.docLanguage = docLanguage;
     }
 
     public Map<String, Double> getResultForQuery() {
@@ -141,7 +143,15 @@ public class Searcher {
 
         for (String docNumber: docsForQuery) {
             int docLength= Integer.valueOf(docsMap.get(docNumber).get(0));
-            relevantDocsForRenker.put(docNumber,docLength);
+            if (!docLanguage.equals("")) {
+                String currentDocLanguage = docsMap.get(docNumber).get(2);
+                if (currentDocLanguage.equals(docLanguage)){
+                    relevantDocsForRenker.put(docNumber,docLength);
+                }
+            }
+            else {
+                relevantDocsForRenker.put(docNumber,docLength);
+            }
         }
         ranker = new Ranker(queryToRanker, relevantDocsForRenker, docsCount_M, avdl, postingLinesToRanker, querySynonyms, synonymsDataToRanker, synonymsPostingLines);
         ranker.rankDocs();

@@ -2,7 +2,6 @@ package view;
 import controller.Controller;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.geometry.Orientation;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -25,7 +24,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.PrintWriter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Gui class - connected to the fxml file.
@@ -41,8 +39,6 @@ public class GUI {
     @FXML
     private javafx.scene.control.CheckBox stemming;
     @FXML
-    private ComboBox languages;
-    @FXML
     private TextField singleQuery;
     @FXML
     private TextField pathForQueryFile;
@@ -52,6 +48,7 @@ public class GUI {
 
     private Controller controller;
     private CheckComboBox<String> checkComboBox;
+    private ComboBox<String> languagesComboBox;
     private boolean stemStatus;
 
 
@@ -98,15 +95,6 @@ public class GUI {
         }
     }
 
-    /**
-     * on action for the combo box, writes the chosen string in the combobox.
-     * @param event
-     */
-    public void comboAction(ActionEvent event) {
-        String field = (String)languages.getValue();
-        if(field == null)
-            return;
-    }
 
     /**
      * on action for the start button.
@@ -301,12 +289,16 @@ public class GUI {
         }
         else if (!singleQuery.getText().equals("")) {
             String query = singleQuery.getText();
+            String chosenLanguage = "";
+            if (languagesComboBox != null) {
+                chosenLanguage = languagesComboBox.getSelectionModel().getSelectedItem();
+            }
             List<String> chosenCities = new ArrayList<>();
             if (checkComboBox != null) {
                 ObservableList<String> chosenCitiesObservable = checkComboBox.getCheckModel().getCheckedItems();
                 chosenCities.addAll(chosenCitiesObservable);
             }
-            Map<String, Double> queryResult = controller.runQuery(chosenCities, query, stemming.isSelected(), semantic.isSelected(), "");
+            Map<String, Double> queryResult = controller.runQuery(chosenCities, query, stemming.isSelected(), semantic.isSelected(), "", chosenLanguage);
             Random random = new Random();
             int queryNum = random.nextInt(999);
             List<Pair<String, Map<String, Double>>> queryResults = new ArrayList<>();
@@ -320,6 +312,10 @@ public class GUI {
                 showErrorAlert("The file is not valid, please enter a new one.");
             }
             else {
+                String chosenLanguage = "";
+                if (languagesComboBox != null) {
+                    chosenLanguage = languagesComboBox.getSelectionModel().getSelectedItem();
+                }
                 List<String> chosenCities = new ArrayList<>();
                 if (checkComboBox != null) {
                     ObservableList<String> chosenCitiesObservable = checkComboBox.getCheckModel().getCheckedItems();
@@ -331,7 +327,7 @@ public class GUI {
                     String queryNum = queryDetails.get(0);
                     String query = queryDetails.get(1);
                     String desc = queryDetails.get(2);
-                    Map<String, Double> queryResult = controller.runQuery(chosenCities, query, stemming.isSelected(), semantic.isSelected(), desc);
+                    Map<String, Double> queryResult = controller.runQuery(chosenCities, query, stemming.isSelected(), semantic.isSelected(), desc, chosenLanguage);
                     Pair<String, Map<String, Double>> queryPair = new Pair<>(queryNum, queryResult);
                     queryResults.add(queryPair);
                 }
@@ -471,21 +467,65 @@ public class GUI {
             Map<String, List<String>> citiesDictionary = controller.getUploadDictionary().getCitiesDictionary();
             //System.out.println(citiesDictionary.size());
             Map<String, List<String>> sortedCities;
-            sortedCities = citiesDictionary.entrySet().stream().sorted(Map.Entry.comparingByKey()).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+            //sortedCities = citiesDictionary.entrySet().stream().sorted(Map.Entry.comparingByKey()).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
             ObservableList<String> citiesList = FXCollections.observableArrayList();
-            for (Iterator<Map.Entry<String, List<String>>> it = sortedCities.entrySet().iterator(); it.hasNext(); ) {
+            for (Iterator<Map.Entry<String, List<String>>> it = citiesDictionary.entrySet().iterator(); it.hasNext(); ) {
                 Map.Entry<String, List<String>> entry = it.next();
                 String city = entry.getKey();
                 if (!city.matches(".*\\d+.*"))
                     citiesList.add(city.toUpperCase());
             }
-            //System.out.println(citiesList);
-            //System.out.println(citiesList.size());
+            Collections.sort(citiesList);
             checkComboBox = new CheckComboBox<>();
             checkComboBox.getItems().setAll(citiesList);
-            checkComboBox.autosize();
-            //System.out.println(checkComboBox.getItems().size());
             gridPane.add(checkComboBox, 1,4);
+        }
+    }
+
+    public void showLanguagesList(){
+        if (controller == null){
+            initControllerForExistingFiles();
+        }
+        if (controller == null)
+            return;
+        else {
+            try {
+                BufferedReader br;
+                if (stemming.isSelected())
+                    br = new BufferedReader(new FileReader(controller.getDicPath() + "stemmedDocsData"));
+                else
+                    br = new BufferedReader(new FileReader(controller.getDicPath() + "docsData"));
+                String line = br.readLine();
+                while (line != null) {
+                    String[] splitedLine = line.split("\\$");
+                    String docNumber = splitedLine[0];
+                    List<String> docList = new ArrayList<>();
+                    for (int i = 1; i < splitedLine.length; i++) {
+                        docList.add(splitedLine[i]);
+                    }
+                    controller.docsDataNoStart.put(docNumber, docList);
+                    line = br.readLine();
+                }
+                br.close();
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+            Set<String> languages = new HashSet<>();
+            for (Iterator<Map.Entry<String, List<String>>> it = controller.docsDataNoStart.entrySet().iterator(); it.hasNext(); ) {
+                Map.Entry<String, List<String>> entry = it.next();
+                String language = entry.getValue().get(2);
+                if (!language.equals("noLanguage") && !language.matches(".*\\d+.*")) {
+                    languages.add(language);
+                }
+            }
+            List<String> languagesArrList = new ArrayList<>(languages);
+            Collections.sort(languagesArrList);
+            ObservableList<String> languagesList = FXCollections.observableArrayList();
+            languagesList.setAll(languagesArrList);
+            languagesComboBox = new ComboBox<>();
+            languagesComboBox.getItems().setAll(languagesList);
+            gridPane.add(languagesComboBox, 1,5);
         }
     }
 

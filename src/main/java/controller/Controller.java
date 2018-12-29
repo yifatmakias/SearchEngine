@@ -23,7 +23,7 @@ public class Controller implements Runnable{
     private boolean toStem;
     private UploadDictionary uploadDictionary;
     private Map<String, Doc> docsData;
-    private Map<String, List<String>> docsDataNoStart;
+    public Map<String, List<String>> docsDataNoStart;
     private Set<String> stopWords;
 
     public Controller(String stopWordsPath, String dicPath, boolean toStem){
@@ -256,6 +256,11 @@ public class Controller implements Runnable{
                 else
                     docLine.append(doc.getCity());
                 docLine.append("$");
+                if (doc.getLanguage().equals("") || doc.getLanguage() == null)
+                    docLine.append("noLanguage");
+                else
+                    docLine.append(doc.getLanguage());
+                docLine.append("$");
                 for (String term: doc.getUpperTermsString()) {
                     docLine.append(term);
                     docLine.append("$");
@@ -299,7 +304,7 @@ public class Controller implements Runnable{
         Map<String, Double> sortedResult;
 
         List<String> docData = this.docsDataNoStart.get(docNumber);
-        for (int i = 2; i < docData.size() ; i++) {
+        for (int i = 3; i < docData.size() ; i++) {
             String entity = docData.get(i);
             Map<String, List<Integer>> dictionary = uploadDictionary.getDictionary();
             if (dictionary.containsKey(entity.toUpperCase())) {
@@ -336,26 +341,28 @@ public class Controller implements Runnable{
         return sortedResult;
     }
 
-    public Map<String, Double> runQuery(List<String> cities, String query, boolean toStem, boolean doSemantic, String description) {
+    public Map<String, Double> runQuery(List<String> cities, String query, boolean toStem, boolean doSemantic, String description, String docLanguage) {
         fillStopWordsSet();
         try {
-            BufferedReader br;
-            if (toStem)
-                br = new BufferedReader(new FileReader(this.dicPath + "stemmedDocsData"));
-            else
-                br = new BufferedReader(new FileReader(this.dicPath + "docsData"));
-            String line = br.readLine();
-            while (line != null) {
-                String[] splitedLine = line.split("\\$");
-                String docNumber = splitedLine[0];
-                List<String> docList = new ArrayList<>();
-                for (int i = 1; i < splitedLine.length; i++) {
-                    docList.add(splitedLine[i]);
+            if (docsDataNoStart.size() == 0) {
+                BufferedReader br;
+                if (toStem)
+                    br = new BufferedReader(new FileReader(this.dicPath + "stemmedDocsData"));
+                else
+                    br = new BufferedReader(new FileReader(this.dicPath + "docsData"));
+                String line = br.readLine();
+                while (line != null) {
+                    String[] splitedLine = line.split("\\$");
+                    String docNumber = splitedLine[0];
+                    List<String> docList = new ArrayList<>();
+                    for (int i = 1; i < splitedLine.length; i++) {
+                        docList.add(splitedLine[i]);
+                    }
+                    docsDataNoStart.put(docNumber, docList);
+                    line = br.readLine();
                 }
-                docsDataNoStart.put(docNumber, docList);
-                line = br.readLine();
+                br.close();
             }
-            br.close();
         }
         catch (Exception e){
             e.printStackTrace();
@@ -368,7 +375,7 @@ public class Controller implements Runnable{
         else
             postingPath = this.dicPath+"postingFile";
 
-        Searcher searcher = new Searcher(query, dictionary, citiesDictionary, postingPath, toStem,  cities, dicPath+"citiesPostingFile", docsDataNoStart, doSemantic, stopWords, description);
+        Searcher searcher = new Searcher(query, dictionary, citiesDictionary, postingPath, toStem,  cities, dicPath+"citiesPostingFile", docsDataNoStart, doSemantic, stopWords, description, docLanguage);
         searcher.queryHandle();
         return searcher.getResultForQuery();
     }

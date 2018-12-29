@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.String?>
-<?import javafx.collections.FXCollections?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
-<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
@@ -47,95 +44,7 @@
             <TextField fx:id="pathForDictionaryAndPosting" GridPane.columnIndex="1" GridPane.rowIndex="1" />
             <Button fx:id="browse2" mnemonicParsing="false" onAction="#browsePostingDir" text="Browse" GridPane.columnIndex="2" GridPane.rowIndex="1" />
             <CheckBox fx:id="stemming" mnemonicParsing="false" text="Use Stemming" GridPane.columnIndex="2" GridPane.rowIndex="4" />
-            <Label text="Choose documents language from the list:" GridPane.rowIndex="5" />
-            <ComboBox fx:id="languages" onAction="#comboAction" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="5">
-                <items>
-                    <FXCollections fx:factory="observableArrayList">
-                        <String fx:value="Enlgish" />
-                        <String fx:value="Hebrew" />
-                        <String fx:value="Cambodia" />
-                        <String fx:value="Russian" />
-                        <String fx:value="Zulu" />
-                        <String fx:value="Turkish" />
-                        <String fx:value="Swedish" />
-                        <String fx:value="Ukrainian" />
-                        <String fx:value="Malay" />
-                        <String fx:value="Tigrigna" />
-                        <String fx:value="Chinese" />
-                        <String fx:value="Armenian" />
-                        <String fx:value="Swahili" />
-                        <String fx:value="Urdu" />
-                        <String fx:value="Serbo" />
-                        <String fx:value="Romanian" />
-                        <String fx:value="Tigrignya" />
-                        <String fx:value="Macedonian" />
-                        <String fx:value="Japanese" />
-                        <String fx:value="Estonian" />
-                        <String fx:value="Bengali" />
-                        <String fx:value="Pashto" />
-                        <String fx:value="French" />
-                        <String fx:value="Portuguese" />
-                        <String fx:value="Uzbek" />
-                        <String fx:value="Persian" />
-                        <String fx:value="German" />
-                        <String fx:value="Span" />
-                        <String fx:value="Serbo-Croatian" />
-                        <String fx:value="English Lithuanian" />
-                        <String fx:value="Chinese" />
-                        <String fx:value="Indonesian" />
-                        <String fx:value="Tagalog" />
-                        <String fx:value="Georgian" />
-                        <String fx:value="Lithuanian" />
-                        <String fx:value="Cambodian" />
-                        <String fx:value="Latvian" />
-                        <String fx:value="Spansih" />
-                        <String fx:value="Korean" />
-                        <String fx:value="Tamil" />
-                        <String fx:value="Rusian" />
-                        <String fx:value="Creole" />
-                        <String fx:value="Chinese" />
-                        <String fx:value="Vietnamese" />
-                        <String fx:value="Czech" />
-                        <String fx:value="Lao" />
-                        <String fx:value="Somali" />
-                        <String fx:value="Dutch" />
-                        <String fx:value="Kyrgyz" />
-                        <String fx:value="Slovak" />
-                        <String fx:value="Belarusian" />
-                        <String fx:value="Greek" />
-                        <String fx:value="Amharic" />
-                        <String fx:value="Hungarian" />
-                        <String fx:value="Danish" />
-                        <String fx:value="Bulgarian" />
-                        <String fx:value="Xhosa" />
-                        <String fx:value="Polish" />
-                        <String fx:value="Albanian" />
-                        <String fx:value="Mandarin" />
-                        <String fx:value="Finnish" />
-                        <String fx:value="Slovenian" />
-                        <String fx:value="Afrikaans" />
-                        <String fx:value="Italian" />
-                        <String fx:value="Dari" />
-                        <String fx:value="Burmese" />
-                        <String fx:value="Kazakh" />
-                        <String fx:value="Azeri" />
-                        <String fx:value="Tigrinya" />
-                        <String fx:value="Malagasy" />
-                        <String fx:value="Cantonese" />
-                        <String fx:value="Norwegian" />
-                        <String fx:value="Thai" />
-                        <String fx:value="Hindi" />
-                        <String fx:value="Spanish" />
-                        <String fx:value="Kinyarwand" />
-                        <String fx:value="Arabic" />
-                        <String fx:value="Tajik" />
-                        <String fx:value="Kinyarwanda" />
-                        <String fx:value="Kirundi" />
-                        <String fx:value="Amharic" />
-                        <String fx:value="Slovene" />
-                    </FXCollections>
-                </items>
-            </ComboBox>
+             <Button fx:id="showLanguages" layoutX="10.0" layoutY="260.0" mnemonicParsing="false" text="Show languages list" GridPane.rowIndex="5" onAction="#showLanguagesList"/>
             <Button fx:id="start" mnemonicParsing="false" onAction="#startClicked" text="Start" GridPane.rowIndex="6" />
             <Button fx:id="reset" mnemonicParsing="false" onAction="#reset" text="Reset" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="7" />
             <Button fx:id="showDic" mnemonicParsing="false" onAction="#showDic" text="Show dictionary" GridPane.columnIndex="1" GridPane.rowIndex="7" />
