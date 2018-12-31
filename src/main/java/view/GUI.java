@@ -201,8 +201,13 @@ public class GUI {
         if (controller == null || stemStatus != stemming.isSelected())
             initControllerForExistingFiles();
         if (controller != null){
-            controller.uploadDictionaries();
-            showInformationAlert("Loading dictionaries successfully.");
+            try {
+                controller.uploadDictionaries();
+                showInformationAlert("Loading dictionaries successfully.");
+            }
+            catch (Exception e) {
+                showErrorAlert("Loading failed, check that the files in the given directory are valid.");
+            }
         }
     }
 
