@@ -314,15 +314,16 @@ public class GUI {
                 chosenLanguage = languagesComboBox.getSelectionModel().getSelectedItem();
             }
             List<String> chosenCities = new ArrayList<>();
-            /**
+
             if (citiesListView != null) {
                 ObservableList<String> chosenCitiesObservable = citiesListView.getSelectionModel().getSelectedItems();
                 chosenCities.addAll(chosenCitiesObservable);
-            }**/
+            }
+            /**
             if (checkComboBox != null) {
                 ObservableList<String> chosenCitiesObservable = checkComboBox.getCheckModel().getCheckedItems();
                 chosenCities.addAll(chosenCitiesObservable);
-            }
+            }**/
             Map<String, Double> queryResult = controller.runQuery(chosenCities, query, stemming.isSelected(), semantic.isSelected(), "", chosenLanguage);
             Random random = new Random();
             int queryNum = random.nextInt(999);
@@ -516,14 +517,14 @@ public class GUI {
                     citiesList.add(city.toUpperCase());
             }
             Collections.sort(citiesList);
-            /**
+
             citiesListView = new ListView<>(citiesList);
             citiesListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
             gridPane.add(citiesListView, 1,4);
-            **/
+            /**
             checkComboBox = new CheckComboBox<>();
             checkComboBox.getItems().setAll(citiesList);
-            gridPane.add(checkComboBox, 1,4);
+            gridPane.add(checkComboBox, 1,4);**/
         }
     }
 
