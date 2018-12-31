@@ -148,7 +148,7 @@ public class Searcher {
 
         for (String docNumber: docsForQuery) {
             int docLength= Integer.valueOf(docsMap.get(docNumber).get(0));
-            if (!docLanguage.equals("")) {
+            if (docLanguage != null && !docLanguage.equals("")) {
                 String currentDocLanguage = docsMap.get(docNumber).get(2);
                 if (currentDocLanguage.equals(docLanguage)){
                     relevantDocsForRenker.put(docNumber,docLength);

@@ -87,8 +87,13 @@ public class Controller implements Runnable{
      * upload dictionary from given file path.
      */
     public void uploadDictionaries(){
-        uploadDictionary.uploadCitiesDictionary();
-        uploadDictionary.uploadDictionary();
+        try {
+            uploadDictionary.uploadCitiesDictionary();
+            uploadDictionary.uploadDictionary();
+        }
+        catch (Exception e) {
+        }
+
     }
 
     /**

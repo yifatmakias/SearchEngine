@@ -52,7 +52,6 @@ public class UploadDictionary {
             br.close();
         }
         catch (Exception e){
-            e.printStackTrace();
         }
     }
 
@@ -76,7 +75,6 @@ public class UploadDictionary {
             br.close();
         }
         catch (Exception e){
-            e.printStackTrace();
         }
     }
 

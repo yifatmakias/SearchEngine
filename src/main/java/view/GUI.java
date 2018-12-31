@@ -265,11 +265,13 @@ public class GUI {
                         filesList.add("stemmedDictionaryFile");
                         filesList.add("stemmedDictionaryToShow");
                         filesList.add("stemmedPostingFile");
+                        filesList.add("stemmedDocsData");
                     } else {
                         this.stemStatus = false;
                         filesList.add("dictionaryFile");
                         filesList.add("dictionaryFileToShow");
                         filesList.add("postingFile");
+                        filesList.add("docsData");
                     }
                     filesList.add("citiesDictionaryFile");
                     filesList.add("citiesPostingFile");
@@ -278,6 +280,9 @@ public class GUI {
                     }
                     if (fileNames.containsAll(filesList)) {
                         controller = new Controller(stopWordsPath, dicPath, stemming.isSelected());
+                    }
+                    else {
+                        showErrorAlert("The posting path is not valid, please try again.");
                     }
                 }
             }
