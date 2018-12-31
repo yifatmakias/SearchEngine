@@ -48,6 +48,7 @@ public class GUI {
 
     private Controller controller;
     private CheckComboBox<String> checkComboBox;
+    private ListView<String> citiesListView;
     private ComboBox<String> languagesComboBox;
     private boolean stemStatus;
 
@@ -166,8 +167,11 @@ public class GUI {
                 while (line != null){
                     filecontent.append(line+'\n');
                     line = br.readLine();
-                    if (line != null)
-                        observableList.add(line);
+                    if (line != null) {
+                        String term = line.split(":")[0];
+                        if (term.length() > 1 && !term.startsWith(",") && !term.startsWith("."))
+                            observableList.add(line);
+                    }
                 }
                 br.close();
             }
@@ -300,6 +304,11 @@ public class GUI {
                 chosenLanguage = languagesComboBox.getSelectionModel().getSelectedItem();
             }
             List<String> chosenCities = new ArrayList<>();
+            /**
+            if (citiesListView != null) {
+                ObservableList<String> chosenCitiesObservable = citiesListView.getSelectionModel().getSelectedItems();
+                chosenCities.addAll(chosenCitiesObservable);
+            }**/
             if (checkComboBox != null) {
                 ObservableList<String> chosenCitiesObservable = checkComboBox.getCheckModel().getCheckedItems();
                 chosenCities.addAll(chosenCitiesObservable);
@@ -497,6 +506,11 @@ public class GUI {
                     citiesList.add(city.toUpperCase());
             }
             Collections.sort(citiesList);
+            /**
+            citiesListView = new ListView<>(citiesList);
+            citiesListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+            gridPane.add(citiesListView, 1,4);
+            **/
             checkComboBox = new CheckComboBox<>();
             checkComboBox.getItems().setAll(citiesList);
             gridPane.add(checkComboBox, 1,4);

@@ -309,6 +309,9 @@ public class Controller implements Runnable{
         List<String> docData = this.docsDataNoStart.get(docNumber);
         for (int i = 3; i < docData.size() ; i++) {
             String entity = docData.get(i);
+            if (Character.isDigit(entity.charAt(0))) {
+                continue;
+            }
             Map<String, List<Integer>> dictionary = uploadDictionary.getDictionary();
             if (dictionary.containsKey(entity.toUpperCase())) {
                 int pointer = dictionary.get(entity.toUpperCase()).get(2);
